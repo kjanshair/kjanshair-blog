@@ -1,0 +1,113 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Docker on Azure";
+}
+
+<header class="intro-header orange-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">Docker on Azure</h1>
+                    <hr class="small">
+                    <span class="subheading">Running your container in the cloud</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <p>
+                    Here in this post, we will see the simplest example of running containerized applications in production.
+                    For running a real-world containerized business application in production environment, we usually take into account a whole lot of stuffs such as cluster management with
+                    <strong>DC\OS</strong> or <strong>Docker Swarm</strong>, use containers specific services like <strong>EC2 Container Service</strong>, <strong>Azure Container Service</strong>, <strong>DigitalOcean</strong> and other factors.
+                    Here we will see that how do we run one container in a simple production environment which is a Linux Azure VM (An Azure service specifically configured for running Docker containers named <i>Docker on Ubuntu Server</i>)
+                    in Microsoft Azure (Although there are other vendors too who provide services for running containers. We will consider Microsoft Azure through out our series) that will be the basis of our next steps i.e. running complex microservice based applications in the cloud.
+                </p>
+                <h2 class="font-light">Microsoft Azure services for Containers</h2>
+                <p>Primarily, there are 2 Azure services available for running containers:</p>
+                <ul class="font-light-text">
+                    <li>Docker Ubuntu Server</li>
+                    <li>Azure Container Service</li>
+                </ul>
+                <p>
+                    We will see here the first one for the sake of simplicity. <strong>Azure Container Services</strong> are pre-configured, best-practiced and secured VMs for running containers
+                    workloads. We can use either DC\OS or Swarm for orchestrating containers across different nodes (More on that in some later post). <strong>Docker on Ubuntu Server</strong> is a small
+                    Linux VM Azure service which has enough capability to run a Docker Host that comes with it as a VM extension. We cannot use remote-client connections to interact with this VM as we used to do in a normal Azure VM.
+                </p>
+                <h2 class="font-light">Creating a Docker Ubuntu VM</h2>
+                <p>To create the service, open-up your Azure portal and go to</p>
+                <p><i>New &gt Containers &gt Docker on Ubuntu Server</i></p>
+                <p>Click create and in the new blade that just popped up, enter your Host Name, a User Name with a password (You can also use public and private SSH keys here instead of a password). We'll name our Host Name as <i>janshair</i> as shown below:</p>
+                <div class="text-center">
+                    <img src="~/images/Docker/DockerOnAzure/docker-azure-1.png" alt="docker-azure-1" class="img-responsive center-block" />
+                </div>
+                <p>Fill-out other attributes for creating the service and click create and you will see that Azure has started creating the VM for you.</p>
+                <p>After a while when the VM is ready, next configure the end-points of this VM to <strong>port 80</strong> for both public and private ports by going to:</p>
+                <p><i>VM &gt Settings &gt EndPoints &gt Add</i></p>
+                <p>In the <strong>Add</strong> blade, type the Name as <i>Docker</i> (Or any other name you want), assign port number 80 to both public and private ports, leave everything else the same, click <strong>OK</strong> and you will see the configured end-points for your Ubuntu VM as shown below:</p>
+                <div class="text-center">
+                    <img src="~/images/Docker/DockerOnAzure/docker-azure-2.png" alt="docker-azure-2" class="img-responsive center-block" />
+                </div>
+                <p></p>
+                <blockquote>
+                    We are assigning the number 80 to both public and private ports because we will be exposing our application from the container to this port number so that we can see it at the default port in our client browser.
+                </blockquote>
+                <p>Now our VM is ready. Next we SSH into this VM using an SSH client. We'll be using <a href="http://www.putty.org/" target="_blank" class="underline">PuTTY</a> but you can use any other SSH client that your want. Open-up PuTTY and type the <i>Host Name</i> and post number (SSH Port 22 by default as shown above) of the VM that configured for us. Here, we will enter <i>janshair.cloudapp.net</i> with port number 22 as shown below:</p>
+                <div class="text-center">
+                    <img src="~/images/Docker/DockerOnAzure/docker-azure-3.png" alt="docker-azure-3" class="img-responsive center-block" />
+                </div>
+                <p></p>
+                <blockquote>
+                    It may display a warning while SSH into a machine for the first time. In that case just click Yes.
+                </blockquote>
+                <p>After clicking Open, it will ask for the user name and password that we configured while creating the VM. Enter the user name and password and then we see that we are successfully logged-in in our Ubuntu VM running in Azure as shown below:</p>
+                <div class="text-center">
+                    <img src="~/images/Docker/DockerOnAzure/docker-azure-4.png" alt="docker-azure-4" class="img-responsive center-block" />
+                </div>
+                <p>Now we are in a Ubuntu machine where Docker is up and running. You can check the Docker version installed in the VM as:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+docker --version
+</pre>
+                </div>
+                <p>Currently there will be no Docker image available here. You have to download a Docker images from the Docker Hub. You can either pull down your own Docker image if you have any or use ,for this example, an image that I've pushed to Docker Hub. So I'm going to pull my own image as:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+    docker pull kjanshair/aspnetcore-example:latest
+</pre>
+                </div>
+                <p>After a while, when the image is downloaded, simply run the following command to expose the port 5000 from the container to the port 80 on the host machine by typing in the terminal as:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+    docker run -p 80:5000 kjanshair/aspnetcore-example
+</pre>
+                </div>
+                <p>Next, navigate to <i>http://janshair.cloudapp.net</i> in the browser, we see that our container is up and running in an Azure VM service for Docker in the cloud as shown below:</p>
+                <div class="text-center">
+                    <img src="~/images/Docker/DockerOnAzure/docker-azure-5.png" alt="docker-azure-5" class="img-responsive center-block" />
+                </div>
+                <p>
+                    Here we just saw how to run a container in Microsoft Azure for production use. In a real world application, we usually don't use one VM with one Docker Host and one container. For applications like these,
+                    we usually use container specific services like (as said before) Azure Container Service or EC 2 Container Service with a cluster manager like Docker Swarm, Kubernetes, DC\OS and others.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+        <hr />
+    </div>
+</article>

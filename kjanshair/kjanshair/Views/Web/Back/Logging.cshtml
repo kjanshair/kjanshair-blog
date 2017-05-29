@@ -1,0 +1,230 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Logging";
+}
+
+<header class="intro-header green-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">Logging</h1>
+                    <hr class="small">
+                    <span class="subheading font-light">Basic and structural application logging in ASP.NET Core</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <h2 class="font-light">Logging</h2>
+                <p>
+                    Logging basically is a way of getting different kind of information about the system so that we can aware of whats going on. For example, we can get the information about a particular even such as
+                    who signed in or out in our application, where a changed URL has been accessed that now does not exist, where the page access failures occurred and whatever else we want to log. In ASP.NET Core, Logging is the built-in part of the framework. Lets see it in action.
+                </p>
+                <blockquote>I'll be using the sample application that I've provided for all of my blogs.</blockquote>
+                <p></p>
+                <blockquote>
+                    I'll be demonstrating the logging capability thats built in into ASP.NET Core and 1 third-party logging provider here.
+                </blockquote>
+                <p>Logging must be used as a middleware in ASP.NET Core, so make sure that you have enabled logging in <i>Startup.cs</i>'s <i>Configure()</i> method as:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">Startup.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        {
+            loggerFactory.AddConsole();     // Add logging to HTTP pipeline
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
+            });
+
+            app.UseStaticFiles();
+        }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    Now what we are about to do is create very simple log messages on the console window whenever Register or Login page is hit or login fails. Writing log message has several verbosity level such as
+                    Critical, Error, Information, Warning and more. These log messages are mentioned with their prefix in the console window such as <i>crit</i> for critical, <i>warn</i> for warning, <i>info</i> for information and others.
+                </p>
+                <p>Go to the <i>AccountController.cs</i> in the sample application and inject the <i>ILogger&ltAccountController&gt</i> dependency in the constructor as:</p>
+                <blockquote>As we saw in <a asp-controller="Web" asp-action="DI" class="underline" target="_blank">Dependency Injection</a> section that we do need to manually register the required service against a dependency for framework based services. Logging is one of them.</blockquote>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">AccountController.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+        using Microsoft.Extensions.Logging;
+
+        private ILogger&ltAccountController&gt _logger;
+        public AccountController(ILogger&ltAccountController&gt logger)
+        {
+            _logger = logger;
+        }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>In the <i>Login()</i> and <i>Register()</i> method add:</p>
+                <div class="bs-example bs-example-tabs font-light" data-example-id="togglable-tabs">
+                    <ul id="myTabs" class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active"><a href="#login" id="home-tab" role="tab" data-toggle="tab" aria-controls="login" aria-expanded="true">Login()</a></li>
+                        <li role="presentation" class=""><a href="#register" role="tab" id="profile-tab" data-toggle="tab" aria-controls="register" aria-expanded="false">Register()</a></li>
+                    </ul>
+                    <div id="myTabContent" class="tab-content">
+                        <div role="tabpanel" class="tab-pane fade active in" id="login" aria-labelledby="login-tab">
+                            <pre class="prettyprint linenums">
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Login()
+        {
+            _logger.LogInformation("Login page is hit!");   //Log a message on the console window
+            return View();
+        }
+</pre>
+                        </div>
+                        <div role="tabpanel" class="tab-pane fade" id="register" aria-labelledby="register-tab">
+                            <pre class="prettyprint linenums">
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Register()
+        {
+            _logger.LogInformation("Register page is hit!");    //Log a message on the console window
+            return View();
+        }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>Now try to hit the <i>Login</i> or <i>Register</i> page, you will see a very basic log message as shown in the console (for Login in the screen shot below).</p>
+                <div>
+                    <img src="~/images/Web/Back/logging/logging-1.png" alt="logging-1" class="img-responsive center-block" />
+                </div>
+                <p>This is the most basic way of getting log message. Lets utilize this in practical that we usually do in production.</p>
+                <h2 class="font-light">Structural Logging with Serilog and Seq</h2>
+                <p>Now we want to use <strong>Structural Logging</strong> which provides a more convenient way for viewing log messages with features like unique ID, log context and others.</p>
+                <p>We will be using <i><a href="https://serilog.net/" class="underline" target="_blank">Serilog</a></i> NuGet package for writing log message on <i><a href="https://getseq.net/" class="underline" target="_blank">Seq</a></i>. So add the following NuGet packages in project.json as dependencies:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+    "Serilog": "2.0.0",
+    "Serilog.Extensions.Logging": "1.0.0",
+    "Serilog.Sinks.Seq": "2.0.0"
+</pre>
+                </div>
+                <p></p>
+                <blockquote>Use the latest version available for these packages.</blockquote>
+                <p>
+                    After adding, download the <a href="https://getseq.net/" class="underline" target="_blank">Seq</a> server and run it on your local system. This will initiate a web instance where we will see our log messages posted by our application.
+                    This can be access by the port (usually) 5341 on localhost.
+                </p>
+                <p>Next configure the <i>Startup.cs</i> class to configure the logging default configuration so that it target the Seq instead of the console as the default logger. This can be done as:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">Startup.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        {
+            //Add Serilog as the default logger.
+            loggerFactory.AddSerilog(new LoggerConfiguration()
+                                        .MinimumLevel.Debug()  //Must specify the debug level
+                                        .WriteTo.Seq("http://localhost:5341/") //The URL of Seq where the log messages will be shown
+                                        .CreateLogger());   //Initiate the logger.
+            .....
+        }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>Thats all we have to do. Now try to add a custom critical message at the login post action as:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">AccountController.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task&ltIActionResult&gt Login(LoginViewModel model)
+        {
+            
+            if (ModelState.IsValid)
+            {
+                ModelState.AddModelError("", $"User {model.Email} does not exist!");
+                _logger.LogCritical($"user {model.Email} login failed!");   //Log a critical message
+                return View();
+            }
+            else
+            {
+                return View();
+            }
+        }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>And tries to login, we will get a error log like in the Seq as:</p>
+                <div>
+                    <img src="~/images/Web/Back/logging/logging-2.png" alt="logging-2" class="img-responsive center-block" />
+                </div>
+                <p></p>
+                <div>
+                    <img src="~/images/Web/Back/logging/logging-3.png" alt="logging-3" class="img-responsive center-block" />
+                </div>
+                <p>The core benefit of structural logging is that we can see the detail description of each log message such as where it is generated from, get the JSON and ActionName paths.</p>
+                <div>
+                    <img src="~/images/Web/Back/logging/logging-4.png" alt="logging-4" class="img-responsive center-block" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>

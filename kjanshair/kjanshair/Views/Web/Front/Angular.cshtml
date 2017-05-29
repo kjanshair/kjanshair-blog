@@ -1,0 +1,90 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Angular";
+}
+
+<header class="intro-header blue-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <img class="img-responsive center-block" src="~/images/web/front/Angular/angular.png" />
+                    <hr class="small">
+                    <span class="subheading font-light">Getting Started with Angular 2.0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <h2 class="font-light">What is Angular?</h2>
+                <p><a href="https://angular.io/" class="underline" target="_blank">Angular</a> is a JavaScript framework for building Single-Page web applications or SPA. Angular provides a rich set of built-in support for building a rich client-side web application such as for consuming a RESTful Api, provide routing support and more. The top features of Angular 2 are <i>Speed, Performance</i> and <i>Development Tooling support</i>. We can write Angular 2 apps either using ECMAScript, Dart or Typescript. Throughout this series, we will be using Typescript for building Angular 2 apps.</p>
+                <blockquote>
+                    Angular 1.x is prior version of Angular 2. Angular 2 is completely remade and is independent of Angular 1. So we won't compare Angular 1 with Angular 2 here.
+                </blockquote>
+                <blockquote>
+                    Typescript is a superset of JavaScript. That means, any valid JavaScript code is a valid Typescript code. Typescript extends JavaScript capabilities by introducing Object-Oriented paradigms and methodologies such as classes, interfaces and explicit data types in JavaScript. It also provides rich Intellisense and compile time checking support.
+                </blockquote>
+                <h2 class="font-light">Architectural View of an Angular App</h2>
+                <p>There are 5 building blocks of an Angular 2 app (although there are more), these are:</p>
+                <ul class="list-group font-light-text">
+                    <li class="list-group-item">Components</li>
+                    <li class="list-group-item">Views</li>
+                    <li class="list-group-item">Directives</li>
+                    <li class="list-group-item">Services</li>
+                    <li class="list-group-item">Routers</li>
+                </ul>
+                <p>Here, we will look at each of them conceptually. We will learn how to actually implement it in actual code in a later blog post. Lets first understand that <i>What is a Component?</i></p>
+                <h2 class="font-light">Components</h2>
+                <p>Angular 2 apps are <strong>Components</strong> based. Component is the fundamental part of an Angular 2 app. <i>A component part (A small part) of a web page can be thought of as an Angular Component </i>. Lets look at components visually so that we can understand them.</p>
+                <p>Suppose a simple web page which is composed of only 3 parts (for example) a <strong>Header</strong>, <strong>Footer</strong> and a <strong>Body</strong> as:</p>
+                <div>
+                    <img src="~/images/Web/Front/Angular/client-angular-1.png" class="img-responsive center-block" alt="Angular-Architecture-1" />
+                </div>
+                <p>If we take this simple web app in the context of an Angular 2 app, we can make 3 components (for example) for each part of the web page, so that each part (Header, Footer and Body) is managed by an <strong>Angular Component</strong>.</p>
+                <div>
+                    <img src="~/images/Web/Front/Angular/client-angular-2.png" class="img-responsive center-block" alt="Angular-Architecture-2" />
+                </div>
+                <p>Each Angular Component can be composed of <strong>Multiple Sub-Components</strong>. For example, the body component can be further composed of 3 sub-components, so that they can be managed easily.</p>
+                <div>
+                    <img src="~/images/Web/Front/Angular/client-angular-3.png" class="img-responsive center-block" alt="Angular-Architecture-3" />
+                </div>
+                <p>Components are organized in a Tree-like structure. The root of the tree is a base component called <strong>AppComponent</strong>. This root component includes all other components that we create and make use of in our Angular application.</p>
+                <p>The primary advantage of this component based approach is <strong>code re-usability</strong>. We create a component once and we can reuse it anywhere in the project or even in another project.</p>
+                <h2 class="font-light">Views</h2>
+                <p>If we take a look at one Angular component, we see that it renders some part of the web page in HTML in the browser. <i>The HTML part that a component renders</i> is called <strong>a View</strong> of that component. This can be a string based markup or can be a separate HTML file.</p>
+                <div>
+                    <img src="~/images/Web/Front/Angular/client-angular-4.png" class="img-responsive center-block" alt="Docker-Architecture-4" />
+                </div>
+                <h2 class="font-light">Directives</h2>
+                <p>As said earlier that Angular Components are used to render some part of a web page. Each part that a component manages has some DOM elements. Every DOM element has attributes which we use to manage different properties of that element. <i>Angular Directives (aka Attribute Directives) are attributes</i> that we use to change the visual appearance or behavior of a DOM element. They are used to extend or teach new things to a DOM element. In fact, a component is also a type of directives.</p>
+                <p>An example of an Angular Directive can be the change of background color of a DOM element upon mouse hover.</p>
+                <h2 class="font-light">Services</h2>
+                <p>An Angular 2 app has to communicate with a back-end server to get the data from and put them into the View to display. Usually the process of fetching data is done by an <strong>Angular Service</strong>. A service is kept separate from other Angular parts such as components and Views.</p>
+                <div>
+                    <img src="~/images/Web/Front/Angular/client-angular-5.png" class="img-responsive center-block" alt="Docker-Architecture-5" />
+                </div>
+                <h2 class="font-light">Routers</h2>
+                <p>Angular 2 supports View Routing based on the URL and optional parameters passed into it. As a component renders a part of an HTML in the View, this HTML markup can contain links to other Angular Components which have other Views to display.</p>
+                <div>
+                    <img src="~/images/Web/Front/Angular/client-angular-6.png" class="img-responsive center-block" alt="Docker-Architecture-6" />
+                </div>
+                <p>A View can be in another component. Using Angular Router, we can quickly navigate to other views. Angular routing supports a much faster way of View Navigations, getting the data from the server and displaying it in the browser.</p>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>

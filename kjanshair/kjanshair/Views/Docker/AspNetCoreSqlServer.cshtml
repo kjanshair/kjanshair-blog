@@ -1,0 +1,201 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "SQL Server on Docker";
+}
+
+<header class="intro-header blue-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <img src="~/images/Docker/AspNetCoreSqlServer/DockerSqlServer-1.png" class="img-responsive center-block" />
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <p>
+                    Throughout the years, we have been using ASP.NET and SQL Server mainly on Windows. <strong>Now the time is changed!</strong> You can now develop the same ASP.NET (with more optimized runtime and libraries) apps with the same SQL Server Database Engine on Linux
+                    and this is what I want to show you here.
+                </p>
+                <p>
+                    To make things more interesting, I will take <a href="https://docs.docker.com/" class="underline" target="_blank">Docker</a>, a
+                    leading container technology platform, into account for this demo. We have an <strong>Azure Linux VM</strong> <i>(Ubuntu 16.04)</i> where Docker is installed,
+                    we will spin up an ASP.NET Core container and a SQL Server container in a separate Docker user-defined network, accessing the application container from the VM's
+                    public IP address and SQL Server container from SSMS on our local Windows machine.
+                </p>
+                <div>
+                    <img src="~/images/Docker/AspNetCoreSqlServer/DockerSqlServer-2.png" class="img-responsive center-block" />
+                </div>
+                <h2 class="font-light">Getting Started</h2>
+                <p>
+                    I have a Linux Ubuntu 16.04 VM in Azure with Docker installed. I will <strong>SSH</strong> into the machine and generate a default ASP.NET Core 1.0 LTS project with SQL Server Entity Framework Core
+                    provider installed. You can do so manually either using <strong>dotnet CLI</strong> or <strong>Yeoman Generators</strong>.
+                </p>
+                <blockquote>
+                    The default ASP.NET Core project uses Identity for authentication\authorization. Identity, in turn, depends upon an EFCore provider which is in our case SQL Server.
+                </blockquote>
+                <p>
+                    Now we do the following 3 important things here:
+                </p>
+                <ul class="list-group font-light">
+                    <li class="list-group-item">Pull down the official Microsoft SQL Server image from Docker Hub</li>
+                    <li class="list-group-item">Change the <strong>Connection String</strong> of the application such that it points to the SQL Server Docker container</li>
+                    <li class="list-group-item">Dockerize the application</li>
+                </ul>
+                <p>Pull down the official SQL Server Docker image from the terminal as:</p>
+                <pre>
+docker pull microsoft/mssql-server-linux:latest
+</pre>
+                <p>
+                    Next, change the connection string of the ASP.NET Core application in the <strong>appsettings.json</strong> file using Vim or Nano editor at the root as:
+                </p>
+                <pre>
+"ConnectionStrings": {
+  "DefaultConnection": "Server=sqlinux;User Id=SA;Password=Br0ckLesnar!;Database=ApplicationDb;Trusted_Connection=False;"
+},
+</pre>
+                <p></p>
+                <blockquote>
+                    Notice the <strong>Server name</strong> in the connection string. It should not be the localhost if you want to run the application inside the Docker container as in our case.
+                    The Server name must match with the SQL Server custom container name when we run it. This is how Services are discovered by the Docker Engine.
+                </blockquote>
+                <blockquote>
+                    Also make sure that the <i>"Trusted_Connection"</i> is set to <strong>false</strong> as it forces the integrated security inside the Linux which is not supported.
+                </blockquote>
+                <p>Now finally create the Dockerfile to build the Docker image of our application at the root as:</p>
+                <pre>
+touch Dockerfile
+</pre>
+                <p>With the contents:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">Dockerfile</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+FROM microsoft/dotnet:1.0.0-preview2-sdk
+
+ENV ASPNETCORE_URLS http://*:5000
+
+COPY . /app
+
+WORKDIR /app
+
+RUN ["dotnet", "restore"]
+
+RUN ["dotnet", "build"]
+
+EXPOSE 5000
+
+ENTRYPOINT ["dotnet", "run"]
+</pre>
+                        </div>
+                    </div>
+
+                </div>
+                <p>And build the image with any name (aspnetcoreapp in our case) by the typing in the terminal:</p>
+                <pre>
+docker build -t aspnetcoreapp .
+</pre>
+                <p>It will start restoring the NuGet packages, setup the environment and build the Docker image for the application.</p>
+                <p>
+                    We now have the SQL Server and ASP.NET Core Docker images. The next thing we need to do is to configure the Azure VM's Network Security Group (NSG) to open port 80 to allow HTTP traffic from the Internet
+                    and the port 1433 to allow our local SQL Server Management Studio to connect to the SQL Server container running inside the Linux VM.
+                </p>
+                <blockquote>
+                    My Linux VM is provisioned using ARM model this is why we need to configure the NSG which was created with the VM. If you used ASM model, configure the VM's endpoint instead.
+                </blockquote>
+                <p>
+                    To do this, we add <strong>Inbound Security Rules</strong> for port 80 and 1433. So go to <i>NSG blade => Inbound security rules => Add inbound security rule</i>, type any formal names and open the ports 80 and 1433 as:
+                </p>
+                <div>
+                    <img src="~/images/Docker/AspNetCoreSqlServer/DockerSqlServer-3.png" class="img-responsive center-block" />
+                </div>
+                <p>This is all we have to do. Now we have 2 Docker images and configured the NSG of the NIC attached with the VM.</p>
+                <h2 class="font-light">Spinning up the containers</h2>
+                <h3 class="font-light">Spin up the SQL Server Container</h3>
+                <p>
+                    To spin up the SQL Server container, type in the terminal as:
+                </p>
+                <pre>
+docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Br0ckLesnar!' -p 1433:1433 -d --name sqlinux --network=isolated_network microsoft/mssql-server-linux
+</pre>
+                <p>
+                    Notice the <i>name of the container</i>. As said earlier that this must match with the <strong>server name</strong> given in the connection string of the web app settings. Also notice that we must place these running containers
+                    inside a separate Docker network. If we don't specify a network, it will run inside the default network and automatic service discovery does not work in the default network. To create a separate Docker network type:
+                </p>
+                <pre>
+docker network create isolated_network
+</pre>
+                <p>And use this network for your containers.</p>
+                <h3 class="font-light">Spin up the ASP.NET Core Container</h3>
+                <p>To run the ASP.NET Core container, simply type:</p>
+                <pre>
+docker run -p 80:5000 -d --name webapp --network=isolated_network aspnetcoreapp
+</pre>
+                <p>
+                    We now have the application and database containers running and they are interacting with each other. To test this, browse to the public IP address or DNS name of your Linux VM on your local machine's browser and you will see that the application is up and running:
+                </p>
+                <div>
+                    <img src="~/images/Docker/AspNetCoreSqlServer/DockerSqlServer-4.png" class="img-responsive center-block" />
+                </div>
+                <p>Go to the Register page and try to register a user:</p>
+                <div>
+                    <img src="~/images/Docker/AspNetCoreSqlServer/DockerSqlServer-5.png" class="img-responsive center-block" />
+                </div>
+                <p>And you can see that the user is successfully created in SQL Server running inside the Docker Container.</p>
+                <div>
+                    <img src="~/images/Docker/AspNetCoreSqlServer/DockerSqlServer-6.png" class="img-responsive center-block" />
+                </div>
+                <p></p>
+                <h2 class="font-light">Connecting Windows SSMS with Docker SQL Server</h2>
+                <p>
+                    We now will use our local SQL Server tool called <strong>SQL Server Management Studio (SSMS)</strong> to connect the SQL Server instance running inside the Docker container inside the Azure VM.
+                    Remember, we opened the port 1433 in the NSG attached to the NIC of the VM. So open the SSMS and type the IP Address of the VM with port <i>(with format [ip_address, port])</i> inside the Server name section, use
+                    the SQL Server Authentication option, type the user <strong>SA</strong> and type the password we used when we spin the SQL Server container:
+                </p>
+                <div>
+                    <img src="~/images/Docker/AspNetCoreSqlServer/DockerSqlServer-7.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    We see that the Server is connected now run a SQL query against one of the table created by Identity in the database and you will see that the record has been successfully added and displaying in the SSMS.
+                </p>
+                <div>
+                    <img src="~/images/Docker/AspNetCoreSqlServer/DockerSqlServer-8.png" class="img-responsive center-block" />
+                </div>
+                <p></p>
+                <h2 class="font-light">Conclusion</h2>
+                <p>
+                    We saw how do we connect an application container and a database container with service discovery feature of Docker Engine. I did not mount any volume to the SQL Server container nor I used any Docker Volume plugin
+                    to make it even more productive so this is stateless by default. Using the same technique for production use case
+                    is not recommended. The idea was to provide a step by step guide to build a simple 3-tier application using Docker containers.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12">
+                        <div class="col-md-12">
+                            <hr />
+                            @await Component.InvokeAsync("Comment")
+                        </div>
+                    </div>
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>

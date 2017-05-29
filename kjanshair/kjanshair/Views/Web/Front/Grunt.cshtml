@@ -1,0 +1,252 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Grunt";
+}
+
+<header class="intro-header orange-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <img class="img-responsive center-block" src="~/images/Web/Front/Grunt/grunt-logo.png" />
+                    <hr class="small">
+                    <span class="subheading font-light">The Grunt Task Runner</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <h2 class="font-light">What are Tasks and Task Runners?</h2>
+                <p>
+                    Building modern web applications require efficient management of web static resources such as HTML\CSS\JavaScript and more. In each management phase, there is a task associated. For example a developer
+                    wants to minify CSS or JavaScript files so that it can be used in production. Minifying CSS or JavaScript file is a task that a developer performs each time he makes a change in a non-minified file because making changes to a minified file is difficult.
+                </p>
+                <p>There are other tasks that a developer needs to perform every time such as compiling LESS or SASS to CSS, concatenating JavaScript files, minify HTML\CSS\JavaScript, compiling CoffeeScript and others. Doing these tasks repeatedly is tedious. This is where <strong>Task Runners</strong> come into play.</p>
+                <p>A Task Runner helps you to run such tasks that you do repeatedly by typing just a single command. 2 popular Task Runners available today are <strong>Grunt</strong> and <strong>Gulp</strong>.</p>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="col-lg-3 col-md-3 col-sm-3">
+
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-3">
+                        <a href="http://gruntjs.com/" target="_blank">
+                            <img class="center-block img-responsive" src="~/images/web/front/grunt/grunt-img.png" />
+                        </a>
+                    </div>
+
+                    <div class="col-xs-12 hidden-md hidden-sm hidden-lg">
+                        <br />
+                    </div>
+
+                    <div class="col-lg-3 col-md-3 col-sm-3">
+                        <a href="http://gulpjs.com/" target="_blank">
+                            <img class="center-block img-responsive" src="~/images/web/front/grunt/gulp-img.png" />
+                            <br />
+                            <br />
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-3">
+                    </div>
+                </div>
+                <p>In Grunt or Gulp, each task has a plugin that is provided to you. You can configure those plugins to run your tasks the way you want. You can create your own plugins to suit your needs. You can find how to create one in the documentation at the Grunt website. Grunt and Gulp both are competitors. For this post, we'll talk about Grunt and the plugins that it provides.</p>
+                <h2 class="font-light">Getting Started with Grunt</h2>
+                <p>The best way to get started with Grunt is to take an example and configure Grunt plugins.  We'll be demonstrating 3 simple tasks. In the first 2 tasks , compiling a LESS file to CSS and minify that compiled CSS file and use it in a HTML page. The third task that we'll see at the end is <i>Grunt Watch</i> task which will watch for changes in the LESS file and run above 2 tasks upon save.</p>
+                <blockquote>
+                    Before using Grunt, make sure that you've installed it on your system using NPM (Node Package Manager). You have to install node.js to use NPM in your system. Just type "npm install -g grunt-cli" in terminal to install Grunt globally.
+                </blockquote>
+                <p>Grunt is managed via a node module as a tooling. Each node module has a "package.json" file which manages the dependencies and other attributes of that module. Now create a directory with any name (I'll use Grunt-Demo) and open up terminal in that folder and type</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm init
+</pre>
+                </div>
+                <p>It will ask some questions to get the values of those attributes such as version, author, entry-point, description and others. Enter all of those values and it will generate a package.json file for you. Next run the following command in the terminal.</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm install grunt --save-dev
+</pre>
+                </div>
+                <p>It will install grunt in the folder. Note the "--save-dev" flag, adding this flag will add the installing module in package.json as a dependency. Now you have installed grunt, next add 3 Grunt plugins that we'll use by typing following in the terminal.</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm install grunt-contrib-less --save-dev
+</pre>
+                </div>
+                <br />
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm install grunt-contrib-cssmin --save-dev
+</pre>
+                </div>
+                <br />
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm install grunt-contrib-watch --save-dev
+</pre>
+                </div>
+                <p>It may take some time to install. Now we have installed the required plugins, next create 2 folders namely "src" and "dist", create an HTML file at the root as Index.html and reference a site.min.css file from the "dist" folder (It doesn't exist yet but will be generated by Grunt). In the "src" folder add a LESS file as site.less. We'll compile this less file, minify it and put it in the "dist" folder.</p>
+                <p>Now lets create a Grunt file. A Gruntfile is a JavaScript file in which we add and configure our Grunt plugins to run our tasks. Add a JavaScript file at the root folder as <strong>Gruntfile.js</strong> and add the following code to add and configure plugins.</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+module.exports = function (grunt) {
+       
+};
+
+grunt.loadNpmTasks("grunt-contrib-less");
+grunt.loadNpmTasks("grunt-contrib-cssmin");
+
+grunt.registerTask("default", ["less", "cssmin"]);
+</pre>
+                </div>
+                <p>From line 1-3, we are about to use grunt plugins in our Gruntfile this is the basic syntax for creating a Gruntfile and is assigned by a function. In line 5 and 6 we are loading the plugins to perform tasks that we've downloaded previously. In line 8 we are defining an alias for both tasks so that upon typing just one Grunt command in terminal, will run both tasks one after another as we'll see shortly.</p>
+                <p>Now lets configure both plugins by add the following code inside the function.</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+module.exports = function (grunt) {
+    grunt.initConfig({
+          
+     });
+ };
+
+ grunt.loadNpmTasks("grunt-contrib-less");
+ grunt.loadNpmTasks("grunt-contrib-cssmin");
+ 
+ grunt.registerTask("default", ["less", "cssmin"]);
+</pre>
+                </div>
+                <p>At line 2, we are calling initConfig() method of Grunt in which we'll configure our tasks. It takes a JavaScript object. With this object we'll pass in the required configurations of our plugins. Lets create LESS compilation task first by adding the following code from line 3-9.</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+module.exports = function (grunt) {
+         grunt.initConfig({
+             less: {
+                dev: {
+                    files: {
+                        "src/site.css": ["src/site.less"]
+                    }
+                }
+           }
+       }
+
+       grunt.loadNpmTasks('grunt-contrib-less');
+       grunt.loadNpmTasks('grunt-contrib-cssmin');
+       
+       grunt.registerTask("default", "less", "cssmin");
+ };
+</pre>
+                </div>
+                <p>Here at line 3, we are configuring the LESS compilation task by typing the name <i>(usually the name of the task is the same as the end word of the plugin name such as "less" in "grunt-contrib-less")</i> and then defining a section named "dev". A section is an independent part of a task so that each can be run independently of others. Then at line 6, we are specifying the LESS file path by writing source to right and destination to left.</p>
+                <p>Now we have configured our LESS compilation task, next configure the "cssmin" task for minifying CSS by adding the following code from line 11-17.</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+module.exports = function (grunt) {
+
+        grunt.initConfig({
+            less: {
+               dev: {
+                   files: {
+                       "src/site.css": ["src/site.less"]
+                   }
+               }
+          },
+
+          cssmin: {
+               all: {
+                  files: {
+                      "dist/site.min.css": "src/site.css"
+                  }
+              }
+          }
+      });
+       
+      grunt.loadNpmTasks('grunt-contrib-less');
+      grunt.loadNpmTasks('grunt-contrib-cssmin');
+       
+      grunt.registerTask("default", "less", "cssmin");
+};
+</pre>
+                </div>
+                <p>Now we have configured our LESS compilation and CSS minifying tasks. Create a LESS file in the "src" folder and run the "grunt" command in the terminal and you'll see that compilation and minification is done for you by Grunt and the required file is generated in "dist" folder. As we can see at line 23 the word "default", if you don't specify any task name with "grunt" command in terminal, the "default" task will run both tasks for you as seen below:</p>
+                <div>
+                    <img class="img-responsive center-block" src="~/images/web/front/grunt/grunt-run.png" />
+                </div>
+                <p>The last thing that we'll do is to implement "Grunt Watch" task. This task will look for changes in the LESS file in "src" folder (in this example) and upon each save, it will run both the "less" and "cssmin" task for you automatically. Lets implement it by adding the following code from line 18-21, line 26 and line 29.</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+module.exports = function (grunt) {
+         grunt.initConfig({
+             less: {
+                dev: {
+                    files: {
+                        "src/site.css": ["src/site.less"]
+                    }
+                }
+           },
+
+           cssmin: {
+                all: {
+                    files: {
+                        "dist/site.min.css": "src/site.css"
+                    }
+                }
+            },
+            
+            watch: {
+                files: ["src/site.less"],
+                tasks: ["less", "cssmin"]
+            }
+        });
+       
+       grunt.loadNpmTasks('grunt-contrib-less');
+       grunt.loadNpmTasks('grunt-contrib-cssmin');
+       grunt.loadNpmTasks('grunt-contrib-watch');
+       
+       grunt.registerTask("default", "less", "cssmin");
+       grunt.registerTask("watchfile", "watch");
+  };
+</pre>
+                </div>
+                <p>If you run the command</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+grunt watchfile
+</pre>
+                </div>
+                <p>We see in the terminal that Grunt is now watching for changes in the LESS file.</p>
+                <div>
+                    <img class="img-responsive center-block" src="~/images/web/front/grunt/grunt-watch.png" />
+                </div>
+                <p>Whenever you make a change in the LESS file and save it, it will run both tasks for you as shown below:</p>
+                <div>
+                    <img class="img-responsive center-block" src="~/images/web/front/grunt/grunt-watch-compiled.png" />
+                </div>
+                <p>Now the "site.min.css" file generated for you in "dist" folder.</p>
+                <p>There are other officials and third-party plugins available at Grunt website.</p>
+                <div class="text-center">
+                    <a href="http://gruntjs.com/plugins" target="_blank" class="btn btn-warning">Grunt Plugins</a>
+                </div>
+                <p>The GitHub source of the above example is available at the link.</p>
+                <div class="text-center">
+                    <a href="https://github.com/kjanshair/Grunt-Demo.git" target="_blank" class="btn btn-primary">Grunt-Demo</a>
+                </div>
+                <blockquote>
+                    Don't forget to run "npm install" after cloning this repository.
+                </blockquote>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>

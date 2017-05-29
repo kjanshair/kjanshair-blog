@@ -1,0 +1,290 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Dependency Injection";
+}
+
+<header class="intro-header blue-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">Dependency Injection</h1>
+                    <hr class="small">
+                    <span class="subheading font-light">Understanding Dependency Injection in ASP.NET Core 1.0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <h2 class="font-light">The Problem</h2>
+            <p>
+                A common mistake that we, especially beginners, do is combining the coding logics of different components of a program. Lets see with the help of an example.
+                Suppose we have a <i>HomeController</i> in MVC, which performs an action of sending Emails for some reason, a common way to do this is:
+            </p>
+            <div>
+
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs font-light" role="tablist">
+                    <li role="presentation" class="active"><a role="tab" data-toggle="tab">HomeController.cs</a></li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="home">
+                        <pre class="prettyprint linenums">
+public class HomeController : Controller
+{
+    public IActionResult Index()
+    {
+        MailMessage message = new MailMessage();
+        message.To = "someone@someone.com";
+        message.From = "fromsomeone@fromsoneone.com";
+        // And other code
+
+        return View();
+    }
+}
+</pre>
+                    </div>
+                </div>
+            </div>
+            <p>As you can see that the code for sending Emails is mixing up with the code of controller action i.e. Sending Emails should not be the core part of controller action as here in this case.</p>
+            <p>So a better way is to place the code for sending Emails into a separate class called <i>EmailService.cs</i> with a method called <i>SendEmail()</i> so that the tasks for a controller action can be minimized. So we write it as:</p>
+            <div class="bs-example bs-example-tabs font-light" data-example-id="togglable-tabs">
+                <ul id="myTabs" class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#sendMail1" id="home-tab" role="tab" data-toggle="tab" aria-controls="home" aria-expanded="true">HomeController.cs</a></li>
+                    <li role="presentation" class=""><a href="#sendMailClass1" role="tab" id="profile-tab" data-toggle="tab" aria-controls="profile" aria-expanded="false">EmailService.cs</a></li>
+                </ul>
+                <div id="myTabContent" class="tab-content">
+                    <div role="tabpanel" class="tab-pane fade active in" id="sendMail1" aria-labelledby="home-tab">
+                        <pre class="prettyprint linenums">
+    public class HomeController : Controller
+    {
+        private EmailService service;
+
+        public HomeController()
+        {
+            service = new EmailService();
+        }
+
+        public IActionResult Index()
+        {
+            service.SendMail();    //Send Email
+            return View();
+        }
+    }
+</pre>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="sendMailClass1" aria-labelledby="profile-tab">
+                        <pre class="prettyprint linenums">
+    public class EmailService
+    {
+        public void SendMail()
+        {
+            // Code for sending Email
+        }
+    }
+</pre>
+                    </div>
+                </div>
+            </div>
+            <p>And the same instance of <i>EmailService.cs</i> class is used by a number of other different classes such as <i>AccountController.cs</i> and <i>ManageController.cs</i> (for example). If we see it visually as:</p>
+            <div>
+                <img src="~/images/Web/Back/DI/DI-1.png" alt="DI-1" class="img-responsive center-block" />
+            </div>
+            <p>
+                Now this code seems a little bit better and modular than the previous one. But it still has a problem, that is the controller classes are still tightly bound to the <i>EmailService.cs</i> class which can cause problems in the future. Lets say, at sometime in the future, we want to change the default implementation
+                of the <i>EmailService.cs</i> class i.e we want to parameterize the constructor.
+            </p>
+            <div>
+                <img src="~/images/Web/Back/DI/DI-2.png" alt="DI-2" class="img-responsive center-block" />
+            </div>
+
+            <p>If we initialized an empty constructor of <i>EmailService.cs</i> class in each controller's constructor (as we have done above in the <i>HomeController.cs</i> constructor) then after changing it to parametrized constructor requires all the instances of <i>EmailService.cs</i> to be changed in each controller's constructor such that each default constructor should pass the required arguments to <i>EmailService.cs</i> constructor.</p>
+            <p>This tight coupling between classes and individual modifications, such as these, can cause serious problems in commercial softwares. This is where we use <strong>Dependency Injection</strong> design pattern and <strong>Inversion of Controls (IoC)</strong>.</p>
+            <h2 class="font-light">What is Dependency Injection?</h2>
+            <p>Dependency Injection (DI) is a design pattern used to achieve loosely coupled classes in object-oriented programming. Inversion of Container or IoC (aka Dependency Injection Container), on the other hand, is a container where we register our dependencies required by another component and they are resolved at runtime for us by the container (as we will see shortly). Lets understand it with the help of our example.</p>
+            <p>DI pattern says: <strong><i>High-Level Modules should not depend upon Low-Level Modules, both should depend upon abstractions</i></strong>. In the above example, you can see that the <i>HomeController.cs</i> class has a direct dependency upon <i>EmailService.cs</i> class. So we will create an abstraction in the form of an <i>Interface</i> between these 2 classes following the DI principle.</p>
+            <p>We now introduce a public Interface <i>IEmailSender.cs</i> with a <i>SendMail()</i> method and derive it from a class that implements this interface:</p>
+            <div class="bs-example bs-example-tabs font-light" data-example-id="togglable-tabs">
+                <ul id="myTabs" class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#Interface" id="home-tab" role="tab" data-toggle="tab" aria-controls="home" aria-expanded="true">IEmailSender.cs</a></li>
+                    <li role="presentation" class=""><a href="#IInterfaceClass" role="tab" id="profile-tab" data-toggle="tab" aria-controls="profile" aria-expanded="false">EmailService.cs</a></li>
+                </ul>
+                <div id="myTabContent" class="tab-content">
+                    <div role="tabpanel" class="tab-pane fade active in" id="Interface" aria-labelledby="home-tab">
+                        <pre class="prettyprint linenums">
+    public interface IEmailSender   //Abstraction
+    {
+        void SendMail();
+    }
+</pre>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="IInterfaceClass" aria-labelledby="profile-tab">
+                        <pre class="prettyprint linenums">
+    public class EmailService : IEmailSender
+    {
+        public void SendMail()
+        {
+            //Code for sending Email
+        }
+    }
+</pre>
+                    </div>
+                </div>
+            </div>
+            <p>We then inject this Interface into <i>HomeController.cs</i> constructor and call the <i>SendMail()</i> method as:</p>
+            <div>
+
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs font-light" role="tablist">
+                    <li role="presentation" class="active"><a role="tab" data-toggle="tab">HomeController.cs</a></li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="home">
+                        <pre class="prettyprint linenums">
+    public class HomeController : Controller
+    {
+        private IEmailSender _sender;
+
+        public HomeController(IEmailSender sender)
+        {
+            _sender = sender;
+        }
+
+        public IActionResult Index()
+        {
+            _sender.SendMail();    //Send Email
+            return View();
+        }
+    }
+</pre>
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <blockquote>
+                <i>SendMail()</i> is usually called a service in the context of DI pattern.
+            </blockquote>
+            <blockquote>
+                Injecting the required dependencies into constructor of the class is known as <i>Constructor Injection</i>. There are other ways of injecting dependencies such as property injection or method injection. In ASP.NET Core the default
+                way of injecting dependencies is constructor injection.
+            </blockquote>
+            <p>
+                Now you can see that we are not creating the direct instance of <i>EmailService.cs</i> class in controller classes, instead we are instantiating an Interface and utilizing just one method in which we are interested in i.e. <i>SendMail()</i>.
+                We can now freely modify other components of the <i>EmailService.cs</i> class without affecting the service.
+            </p>
+            <div>
+                <img src="~/images/Web/Back/DI/DI-3.png" alt="DI-3" class="img-responsive center-block" />
+            </div>
+            <p>This is the most basic example of a DI pattern in ASP.NET Core. We created an abstraction, supplied the method that we need and injected the required service in the constructor at the required place.</p>
+            <p>Now if you run the application like this, you will get an exception of <strong>Unable to resolve service for type '........'</strong>. This is because the DI container does not know that <i>from which class or service this IEmailSender dependency to resolve against</i>? This is where we use DI Containers or Inversion of Control (IoC).</p>
+            <h2 class="font-light">DI Container</h2>
+            <p>
+                A DI Container is a container where <i>we register our dependency against a service</i> so that they get resolved at runtime for us. <strong><i>What does that mean?</i></strong> It means as we saw in the above example, when we run the application we get an exception of <i>Unresolved dependency</i> because the DI Container does not know from which service the <i>IEmailSender</i> dependency to resolve against!
+                We register our dependency against a service here by telling the dependency with the service class and DI container resolved the dependency at runtime for us.
+            </p>
+            <p>
+                There are several open-source and community created DI containers are available which we can use in our applications such as <a href="http://www.ninject.org/" class="underline" target="_blank">Ninject</a>, <a href="https://autofac.org/" class="underline" target="_blank">Autofac</a> and Microsoft Unity.
+                Here we will only discuss the one that is built-in ASP.NET Core.
+            </p>
+            <h2 class="font-light">Dependency Injection in ASP.NET Core</h2>
+            <p>A good thing about ASP.NET Core is that it is now deeply integrated with Dependency Injection pattern by default. In the past, you have the option to use DI but in ASP.NET Core, you have to use this.</p>
+            <blockquote>
+                You can also integrate third-party DI Containers in ASP.NET Core as well.
+            </blockquote>
+            <p>Dependencies are managed in <i>Startup.cs</i> class's <i>ConfigureService (IServiceCollection services)</i> method where we add dependencies with the required services against those dependencies in <i>services</i> collection as we will see shortly with our example.</p>
+            <p>Now we want to register our service <i>IEmailSender.cs</i> against the dependency <i>EmailService.cs</i> so we will add it into the <i>Startup.cs</i>'s <i>ConfigureServices (IServiceCollection services)</i> as:</p>
+            <div>
+
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs font-light" role="tablist">
+                    <li role="presentation" class="active"><a role="tab" data-toggle="tab">Startup.cs</a></li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="home">
+                        <pre class="prettyprint linenums">
+    public class Startup
+    {
+        // Configure DI services here
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddMvc();
+
+            services.AddTransient&ltIEmailSender, EmailService&gt();    //Register IEmailSender dependency against EmailService class
+        }
+
+        //Configure middlewares for HTTP pipeline here
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        {
+            loggerFactory.AddConsole();
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseMvcWithDefaultRoute();
+        }
+    }
+</pre>
+                    </div>
+                </div>
+            </div>
+            <p>Now if you run the application, you will see that DI container has resolved the required dependency required by the controllers for us and our application is up and running.</p>
+            <p>
+                Here is an important thing that I want you to understand, that is the <i>lifetime of a service</i> provided by the DI container. There are 3 generic options which
+                we can use to configure services in the DI container based on our needs these are <i>AddScoped<></i>, <i>AddSingleton<></i> and <i>AddTransient<></i>. Here is the description of each:
+            </p>
+            <div class="bs-example bs-example-tabs font-light" data-example-id="togglable-tabs">
+                <ul id="myTabs" class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#AddScoped" id="home-tab" role="tab" data-toggle="tab" aria-controls="home" aria-expanded="true">AddScoped<></a></li>
+                    <li role="presentation" class=""><a href="#AddSingleton" role="tab" id="profile-tab" data-toggle="tab" aria-controls="profile" aria-expanded="false">AddSingleton<></a></li>
+                    <li role="presentation" class=""><a href="#AddTransient" role="tab" id="profile-tab" data-toggle="tab" aria-controls="profile" aria-expanded="false">AddTransient<></a></li>
+                </ul>
+                <div id="myTabContent" class="tab-content">
+                    <div role="tabpanel" class="tab-pane fade active in" id="AddScoped" aria-labelledby="home-tab">
+                        <p>
+                            If we use our service as <i>AddScoped&ltIEmailSender, EmailService&gt()</i> then this service will be available <strong>only for life time of that request</strong>. If another request
+                            comes in the another instance if <i>EmailService.cs</i> class will be created based on the <i>IEmailSender</i> dependency.
+                        </p>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="AddSingleton" aria-labelledby="profile-tab">
+                        <p>
+                            If we want to use just one instance of <i>EmailService.cs</i> service against the dependency <i>IEmailSender.cs</i> <strong>for the life time of the web server</strong>, then we add it as:
+                            <i>AddSingleton&ltIEmailSender, EmailService&gt();</i> in the DI container and it will be passed out to all the dependencies that need it.
+                        </p>
+                    </div>
+                    <div role="tabpanel" class="tab-pane fade" id="AddTransient" aria-labelledby="profile-tab">
+                        <p>
+                            We use <i>AddTransient&ltIEmailSender, EmailService&gt();</i> if we want to get an instance of <i>EmailService.cs</i> class against the dependency <i>IEmailSender.cs</i> for every
+                            dependency that requires it from the DI container. This is what we have used in our example.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <p>
+                It is important to know that we, in this example, used and register user-defined services into the DI container.
+                There are also framework provided services such as <strong>MVC</strong> and <strong>Logging</strong> which are not configured the way like this. These are the services preconfigured for you by the framework.
+            </p>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>

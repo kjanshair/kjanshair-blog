@@ -1,0 +1,183 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Docker Volumes";
+}
+
+<header class="intro-header green-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">Docker Volumes</h1>
+                    <hr class="small">
+                    <span class="subheading font-light">Persistence Storage with Docker Volumes</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <h2 class="font-light">Containers default storage behavior</h2>
+                <p>
+                    In Docker, when we spin up a container that do some kind of data storage to be used by other containers, by default containers like these are stateless.
+                    This means they lose their state (including the data they contain) when they are removed. This is not what we want when we run our containerized applications in production.
+                    This is where we use <strong>Docker Volumes</strong> for persistence storage.
+                </p>
+                <h2 class="font-light">Docker Volumes</h2>
+                <p>
+                    Docker Volumes bypass the union file-system of Docker used for data storage in a container. Before a practical demo, let's understand that when it comes to containers, we have 3 options to use as Docker Volumes:
+                </p>
+                <ul class="list-group font-light">
+                    <li class="list-group-item">1 - <strong>Docker Host</strong> Level Volumes</li>
+                    <li class="list-group-item">2 - <strong>OS Host</strong> Level Volumes</li>
+                    <li class="list-group-item">3 - <strong>Volume Plugins</strong></li>
+                </ul>
+                <p></p>
+                <h2 class="font-light">Docker Host Level Volumes</h2>
+                <p>
+                    This is the simplest example of understanding and getting started with Volume. To demonstrate this, I will use a simple <strong>BusyBox</strong> Docker image to keep things simple. The very first category of Volumes that you will find is the Docker Host level volumes.
+                    This means you will use the <strong>Docker Host</strong> as the target data volume store and you will be able to reuse this volume as soon as the Docker Host is there.
+                </p>
+                <div>
+                    <img src="~/images/Docker/DockerVolumes/docker-volume-1.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    If the Docker Host (or the container itself) dies, the volume will also die.
+                    Volumes are mounted when we run it and is demonstrated by <strong>-v</strong> flag in the run command. For example if you run the <strong>BusyBox</strong> container as:
+                </p>
+                <pre>
+docker run -it -v /data --name volume1 busybox
+</pre>
+                <p>
+                    This will use the Docker-Host level volume and will launch the interactive terminal session within the container. Try to ls the directories there and you will find the <i>/data</i> directory as we specified in the command. <strong>CD</strong> into that and try to create a simple text file as:
+                </p>
+                <pre>
+touch file.txt
+</pre>
+                <p>Try to restart the container and re-attach it as:</p>
+                <pre>
+docker restart volume1
+</pre>
+                <pre>
+docker attach volume1
+</pre>
+                <p>
+                    <strong>CD</strong> into the same directory and ls the files, there you will still find your text file that you created on the volume. You can also inspect the container to see where volumes has been used by the containers with the command:
+                </p>
+                <pre>
+docker inspect volume1
+</pre>
+                <p></p>
+                <h2 class="font-light">OS-Host Level Volumes</h2>
+                <p>
+                    <strong>Docker-Host</strong> level volumes has a problem, that is <i>if we remove the Docker-Host from the system, we will lose all of our data inside the container</i>. Also, if we remove the container and re-run it, you won't find your data again.
+                    To tackle this, we use <strong>OS-Host</strong> Level Volumes. The only thing it does is rather writing data to the Docker-Host, it writes directly to the OS-Host file system where Docker Host is running. So, if the Docker Host
+                    dies and we re-run the container with the same Volume path, our data will still be there on the Host OS.
+                </p>
+                <div>
+                    <img src="~/images/Docker/DockerVolumes/docker-volume-2.png" class="img-responsive center-block" />
+                </div>
+                <p>To see it in action with the same example type in the terminal as:</p>
+                <pre>
+docker run -it -v d:\data:/data --name volume1 busybox
+</pre>
+                <p>It will start an interactive terminal session <strong>CD</strong> into the <i>/data</i> directory, create a text file and you will find the folder with the file <strong>file.txt</strong> at your host OS.</p>
+                <blockquote>
+                    I'm on Windows so I'm using Windows directory structure. To enable this feature on Windows, you have to go to <i>Docker-Engine Settings => Shared Drives</i> and mark the drive letter where you want to allow the Docker Engine to access the directories.
+                </blockquote>
+                <p>
+                    Now try to remove the container and re-run it with the same volume path as:
+                </p>
+                <pre>
+docker rm -f volume1
+</pre>
+                <pre>
+docker run -it -v d:\data:/data --name volume1 busybox
+</pre>
+                <p><strong>CD</strong> into the same directory and you will find your text file in the <i>/data</i> directory. You can also inspect the container to see host mount volume path.</p>
+                <h2 class="font-light">Using Volume Plugins</h2>
+                <p>
+                    With <strong>OS-Host Level Volume</strong>, we still have a couple of problems. What if the Host Operating System dies? What if a VM that we provisioned and holds the container data got under maintenance and is unavailable for a moment? What if we use a <strong>Swarm Cluster</strong>
+                    in production where containers are being orchestrated across different nodes and how do we get our data at different hosts? The preceding two techniques are not appropriate in these cases. This is where we use <strong>Volume Plugins</strong> aka <i>Volume Drivers</i>.
+                </p>
+                <p>
+                    Docker supports <strong>Plugins</strong>. Docker Plugins add additional functionalities to a Docker Engine, usually 3rd-Party plugins. There are different types of plugins such as <strong>Volume Plugins</strong>, <strong>Networking Plugins</strong>. If we take Volume Plugins only, there are a couple of plugins
+                    for dealing with persistence storage and each has different capabilities some of them are:
+                </p>
+                <ul class="list-group font-light">
+                    <li class="list-group-item">
+                        <h3 class="font-light"><strong>Azure File Storage</strong></h3>
+                        <p>
+                            Use Azure File Storage as mounts to the containers running in a Swarm Cluster. You can read more about them from <a href="https://github.com/Azure/azurefile-dockervolumedriver" class="underline" target="_blank">here</a>.
+                        </p>
+                    </li>
+                    <li class="list-group-item">
+                        <h3 class="font-light"><strong>Flocker</strong></h3>
+                        <p>
+                            As we use Swarm for container orchestration across different nodes in a Swarm Cluster, Flocker is <strong>Volume Orchestrator</strong> plugin i.e. it moves the volume to a different host if container that writes data to it moves to another host in a Swarm Cluster. You read more about Flocker from
+                            <a href="https://flocker-docs.clusterhq.com/en/latest/docker-integration/" class="underline" target="_blank">here</a>.
+                        </p>
+                    </li>
+                    <li class="list-group-item">
+                        <h3 class="font-light"><strong>REX-Ray</strong></h3>
+                        <p>
+                            One of the popular Volume Plugins. It provides a shared mechanism for Volumes across different nodes in a Swarm Cluster. <strong>REX-Ray uses Storage Providers</strong> to which data volumes are written such as <strong>Amazon EC2</strong>, <strong>EMC</strong> and others. You can read more about
+                            REX-Ray from <a href="https://rexray.readthedocs.io/en/stable/" target="_blank" class="underline">here</a>.
+                        </p>
+                    </li>
+                </ul>
+                <p></p>
+                <h2 class="font-light">Data Volumes with PostgreSQL Container</h2>
+                <p>
+                    Now let's see a tiny example of data persistence on a single Docker Host using a .NET Core application that writes some data to a Postgres database container. I already have the Docker image of the application on my machine where server section is pointing to the name of the Postgres container in the connection string.
+                    So I'll run the Postgres container with a custom name and a volume mount first as:
+                </p>
+                <pre>
+docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=5432 --network=isolated_network --name postgres -v data:/var/lib/postgresql/data postgres
+</pre>
+                <p>
+                    Note the path <i>/var/lib/postgresql/data</i>, this is where Postgres container writes its data. The above command will spin up the container in a separate Docker network with the name <i>isolated_network</i> and ready for use.
+                    Now let's run the application container with the image name <strong>aspnetcoreapp</strong> in the same network as:
+                </p>
+                <pre>
+docker run -d -p 5000:5000 --network=isolated_network aspnetcoreapp
+</pre>
+                <p>Navigate to the application in the browser, try to register a user and you will see that the user is registered successfully:</p>
+                <div>
+                    <img src="~/images/Docker/DockerVolumes/docker-volume-3.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    Now try to remove the Postgres container and re-run it with the same volume mount as:
+                </p>
+                <pre>
+docker rm -f postgres
+</pre>
+                <pre>
+docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=5432 --network=isolated_network --name postgres -v data:/var/lib/postgresql/data postgres
+</pre>
+                <p>Try to login with the same user you registered previously and you will see that the user is logged in successfully. Hence our Postgres data is persistence. You can check the used Docker volumes by names on your host as:</p>
+                <pre>
+docker volume ls
+</pre>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12">
+                        <div class="col-md-12">
+                            <hr />
+                            @await Component.InvokeAsync("Comment")
+                        </div>
+                    </div>
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>

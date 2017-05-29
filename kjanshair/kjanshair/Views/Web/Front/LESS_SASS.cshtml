@@ -1,0 +1,418 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "LESS and SASS";
+}
+
+<header class="intro-header green-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">LESS\SASS</h1>
+                    <hr class="small">
+                    <span class="subheading font-light">Easy CSS with LESS and SASS in a Nutshell</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <p>
+                    Today I'll be quickly sharing with you one of my favorite feature for writing CSS, <strong>LESS</strong> and <strong>SASS</strong>.
+                    LESS\SASS are <strong>CSS Preprocessors</strong>. It means, we write LESS\SASS files in some syntax
+                    and compile it to plain CSS so that browsers can understand.
+                </p>
+                <p>
+                    We write LESS\SASS file and usually use a build system (like Grunt or Gulp) to compile it to plain CSS. Let's see some of the problems with CSS
+                    that a CSS preprocessor like LESS or SASS solves.
+                </p>
+                <p>
+                    Let us take a look at the following CSS file:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">site.css</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+h2,h3 {
+    font-family: "Verdana";
+}
+.products {
+    font-family: "Verdana";
+    color: #FFFFFF;
+}
+div.products > a {
+    font-family: "Verdana";
+    color: #FFFFFF;
+    text-decoration: none;
+}
+div.products > a:hover {
+    font-family: "Verdana";
+    color: #808080;
+    text-decoration: none;
+}
+image:hover {
+    cursor: pointer;
+}
+.panel-heading {
+    cursor: pointer;
+    color: #FFFFFF;
+}
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>This is a small and straightforward CSS file. Now there are some problems with this CSS file, here, we are defining:</p>
+                <ul class="font-light">
+                    <li><i>font-family</i> (4 times) and <i>color</i> with value #FFFFFF (3 times) properties at different selectors.</li>
+                    <li>2 common properties in 2 different CSS selectors twice. <i>(font-family and text-decoration in <strong>.products</strong> and <strong>div.products > a:hover</strong>)</i></li>
+                    <li>If your CSS file like this becomes too large, modifying and adding CSS becomes tedious.</li>
+                </ul>
+                <p>
+                    This is where we use CSS Preprocessors which help us to reduce these issues. There are 2 popular CSS Preprocessors <strong>LESS</strong> and <strong>SASS</strong>. A CSS Preprocessor
+                    adds the following notions in your CSS files:
+                </p>
+                <ul class="list-group font-light">
+                    <li class="list-group-item"><strong>Variables</strong> to reuse CSS properties</li>
+                    <li class="list-group-item"><strong>Mixins</strong> to reuse existing CSS classes</li>
+                    <li class="list-group-item"><strong>Built-In Functions</strong> to calculate and modify colors</li>
+                    <li class="list-group-item"><strong>Mathematical Functions</strong> for numerical calculations</li>
+                    <li class="list-group-item"><strong>Modules</strong> for exporting and importing LESS files</li>
+                </ul>
+                <p>
+                    Let's see the above <i>site.css</i> file in the context of LESS and SASS, we use build systems like <strong><i><a asp-controller="Web" asp-action="Grunt" class="underline" target="_blank">Grunt</a></i></strong> and others to compile LESS and SASS files.
+                    We will see LESS in action and show you how you can do the same with SASS because I'm using LESS for this website too. <i class="fa fa-smile-o"></i>
+                </p>
+                <br />
+                <div>
+                    <img src="~/images/Web/Front/LESSSASS/less.png" alt="LESS" />
+                </div>
+                <p>As said earlier, LESS is a CSS preprocessor which needs to be compile in plain CSS using a build system. A LESS file has an extension of <strong>.less</strong>.</p>
+                <h3 class="font-light"><strong>Variables</strong></h3>
+                <p>
+                    We can define <strong>Variables</strong> in a LESS file once and reuse those variables
+                    in different CSS selectors where we need. Variables in LESS are defined as the name of the variable followed by an <strong>@@</strong> sign like: <strong>@@fontFamily</strong>.
+                    Now create a LESS file with any name (i.e. site.less) having "<strong>.less</strong>" extension and paste the above CSS code in this LESS file. Below is the LESS file, where we defined 2 variables
+                    <strong>@@fontFamily</strong> with value "<i>Verdana</i>" and <strong>@@textColor</strong> with the value "<i>#FFFFFF</i>":
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">site.less</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+@@fontFamily: "Verdana";     // Define a variable "fontFamily" with value "Verdana"
+@@textColor: #FFFFFF;     // Define another variable "textColor" with value "#FFFFFF"
+h2,h3 {
+    font-family: @@fontFamily;
+}
+.products {
+    font-family: @@fontFamily;
+    color: @@textColor;
+}
+div.products > a {
+    font-family: @@fontFamily;
+    color: @@textColor;
+    text-decoration: none;
+}
+div.products > a:hover {
+    font-family: @@fontFamily;
+    text-decoration: none;
+    color: #808080;
+}
+image:hover {
+    cursor: pointer;
+}
+.panel-heading {
+    cursor: pointer;
+    color: @@textColor;
+}
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p></p>
+                <h3 class="font-light"><strong>Mixins</strong></h3>
+                <p>
+                    Mixins let you define common CSS properties once and reuse them wherever you need them. For example, in the above LESS file, the properties of product class selector from lines 8 to 11
+                    are being written twice in <strong><i>div.product > a</i></strong> selector from lines 13 to 17. So we can write it as:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">site.less</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+...
+...
+.products {
+    font-family: @@fontFamily;
+    color: @@textColor;
+}
+div.products > a {
+    .products;  // Reuse the properties from .product class
+    text-decoration: none;
+}
+...
+...
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p></p>
+                <h3 class="font-light"><strong>Functions</strong></h3>
+                <p>
+                    LESS provides some built-in functions to manipulate color properties i.e. we call a built-in LESS function passing 2 parameters, a color with some value and the amount in percentage
+                    of how much to manipulate the specified color. Followings are (but not all) the build-in functions in LESS that we can use:
+                </p>
+                <ul class="font-light">
+                    <li>lighten(color, amount)</li>
+                    <li>darken(color, amount)</li>
+                    <li>fadein(color, amount)</li>
+                    <li>fadeout(color, amount)</li>
+                    <li>fade(color, amount)</li>
+                    <li>mix(color, amount)</li>
+                    <li>alpha(color, amount)</li>
+                    <li>saturation(color, amount)</li>
+                </ul>
+                <p>Taking the above example, we want the anchor element to be 50% darken whenever mouse pointer hovers it i.e.</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">site.less</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+@@textColor: #FFFFFF;     // Define another variable "textColor" with value "#FFFFFF"
+...
+...
+div.products > a:hover {
+    font-family: @@fontFamily;
+    text-decoration: none;
+    color: darken(@@textColor, 50%);    // Darken the textColor by 50% for this selector
+}
+...
+...
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p></p>
+                <h3 class="font-light"><strong>Modules</strong></h3>
+                <p>
+                    Modules lets you import your CSS from other CSS files. Lets say we want to define all the variables in a separate LESS file called "<i>variables.less</i>".
+                    So we create another LESS file with the name "<i>variables.less</i>" and define all of our LESS variables there like:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">variables.less</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+@@fontFamily: "Verdana";
+@@textColor: #FFFFFF;
+...
+...
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>We then import this "<i>variables.less</i>" file in our "<i>site.less</i>" file by writing at the top:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">site.less</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+@@import "variables.less";  // Import LESS variables from variables.less file
+...
+...
+...
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>This approach makes it easy to modularize our multiple LESS files.</p>
+                <p>We saw here some of the most common LESS features. There are other LESS features like <strong>Mixins with parameters</strong>, <strong>Mixins patterns</strong>, <strong>Guards</strong> and others.</p>
+                <br />
+                <div>
+                    <img src="~/images/Web/Front/LESSSASS/sass.png" alt="sass" />
+                </div>
+                <p>
+                    Now let's have a look at SASS. SASS, like LESS, is also a CSS preprocessor where we define CSS in some syntax and compile it in the plain CSS. SASS files have <strong>.scss</strong> extensions.
+                    Let's compare LESS stuff that we discuss above with SASS. We will see that they both actually solve the same problem but in a bit different way.
+                </p>
+                <h3 class="font-light"><strong>Variables</strong></h3>
+                <p>
+                    In SASS, variables are defined as the name of the variable followed by a <strong>$</strong> sign instead of an <strong>@@</strong> sign. Unlike LESS, SASS variables can have different types like numbers, strings, booleans, colors etc.
+                    Taking the same above CSS file, we define SASS variables like:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">site.scss</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+$fontFamily: "Verdana";
+$textColor: #FFFFFF;
+...
+...
+...
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p></p>
+                <h3 class="font-light"><strong>Mixins</strong></h3>
+                <p>In SASS, defining Mixins is also different. we define Mixins in SASS as:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+@@mixin .products {
+    // Common CSS properties
+}
+</pre>
+                </div>
+                <p>And include it where we need it like this:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+div.products > a {
+    @@include .products
+}
+</pre>
+                </div>
+                <p>So in the above example, we define SASS mixins as:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">site.scss</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+...
+...
+@@mixin .products {
+    font-family: $fontFamily;
+    color: $textColor;
+}
+div.products > a {
+    @@include .products;  // Reuse the properties from .product class
+    text-decoration: none;
+}
+...
+...
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p></p>
+                <h3 class="font-light"><strong>Functions</strong></h3>
+                <p>The use of functions in SASS are the same like LESS.</p>
+                <h3 class="font-light"><strong>Modules</strong></h3>
+                <p>
+                    The use of Modules in SASS are also identical to LESS. For example, if we create a "<i>variables.scss</i>" file
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">variables.scss</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+$fontFamily: "Verdana";
+$textColor: #FFFFFF;
+...
+...
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    and want to import this SASS into our "<i>site.scss</i>" file, we do this as:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">site.scss</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+@@import "variables.scss"
+...
+...
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>Here we just saw some of the most common features that we will mostly use in a CSS preprocessors like LESS or SASS. Here you can learn more about <a href="#" class="underline" target="_blank">LESS</a> and <a href="#" class="underline" target="_blank">SASS</a>.</p>
+                <h2 class="font-light">LESS and SASS in Visual Studio</h2>
+                <p>
+                    If you are using Visual Studio for writing your LESS and SASS files, you then don't need any build system tool. Just install a Visual Studio Extension <strong>Web Compiler</strong>
+                    and use it to easily compile your LESS\SASS files in your project. This extension not only compiles LESS\SASS files, but also a number of other files like <strong>JSX</strong>,
+                    <strong>TypeScript</strong>, <strong>Stylus</strong>, <strong>CoffeeScript</strong> and others.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>
+

@@ -1,0 +1,184 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Microservices";
+}
+
+<header class="intro-header red-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">Microservices</h1>
+                    <hr class="small">
+                    <span class="subheading">Understanding Microservice Architecture with Docker</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <p>
+                    Before understanding the benefits of using Microservices architecture, we should take a look back to the traditional application deployment methodology and the problems with them,
+                    then we will see how utilizing Microservices can help us to solve those problems, reduce the cost, develop components of our applications (called a Microservice) and help us to develop high availability applications.
+                </p>
+                <h2 class="font-light">Traditional (Monolithic) Application Deployment Methodology</h2>
+                <p>To understand traditional methodology, let's take an example. Suppose you have a 3-tier web application which includes:</p>
+                <ul class="font-light">
+                    <li>A Front End Layer</li>
+                    <li>A Business Logic Layer</li>
+                    <li>A Data Layer</li>
+                </ul>
+                <p>
+                    This is a typical web application and each of them has their own services running inside of them. Let's say each service performs a specific task such as one service might be used for authenticating users, another might be for
+                    getting API(s) etc. Let us call 3 services in each block (layer) namely <strong>A</strong>, <strong>B</strong> and <strong>C</strong> used for performing 3 different tasks.
+                </p>
+                <div>
+                    <img src="~/images/Docker/Microservices/Microservice1.png" alt="Microservice 1" class="img-responsive center-block" />
+                </div>
+                <p></p>
+                <blockquote>
+                    This is not a broad definition of a Service. A service can be located on your local system or it can be anywhere else on the Internet.
+                </blockquote>
+                <p>Let's see some common problems with them that we, as developers, confront in development and cloud-based production life-cycle.</p>
+                <p>Suppose at a given point, the business logic service needs more CPU(s) or RAM utilization than it has already due to increase in traffic. What will be the common solution?</p>
+                <p>
+                    In the cloud world, you might say that it is a matter of seconds. We upgrade our service plans to scale out our application, we then can get more CPU(s) and RAM and
+                    move our current IT infrastructure to this newly created one. Off course doing this can be efficient but <strong>there would be some downtime while doing this.</strong>.
+                </p>
+                <p>
+                    Another common problem can be that suppose you have been asked to modify some part of the service <strong>B</strong> according to the client requirements. You make changes that is required
+                    and then <strong>you have to redeploy the whole block</strong> for just a small change.
+                </p>
+                <p>
+                    If you run into a problem in any of these running services in production, <strong>
+                        you have to scan and run Unit Tests against the whole block
+                    </strong> to identify and fix the problem. This monolithic
+                    approach has most of its functionality in a single block which is also composed of different libraries.
+                </p>
+                <p>Problems like these affects the <i>High Availability</i> and <i>Agility</i> of applications. This is where we use <strong>Microservice Architecture</strong>.</p>
+                <h2 class="font-light">What is a Microservice?</h2>
+                <p>
+                    If you search over the Internet for Microservices, you might get different definitions. But, in a nutshell, a <strong>Microservice is an Autonomous and Independent service</strong>
+                    running inside of an application. We break the whole monolithic application into smaller services called <strong>Microservices</strong>. Each Microservices encapsulate a business
+                    scenario or a responsibility. Microservices usually connect and share data with each other using names or networks.
+                </p>
+                <p>
+                    Let's take a look at the same above example from a Microservice Architecture view.
+                </p>
+                <p>
+                    If we use Microservice Architectural Pattern, we divide each service <strong>A</strong>, <strong>B</strong> and <strong>C</strong>
+                    into a <strong>Microservice</strong> and connect them with each other. These 3 services are now independent, separately unit testable and usually they will be maintained
+                    and delivered separately. If any of these running Microservices fails, the Cluster Manager (as we will see shortly) can revert the working Microservices for us.
+                    Each Microservice can also be maintained by a single member of a team.
+                </p>
+                <div>
+                    <img src="~/images/Docker/Microservices/Microservice2.png" alt="Micrservice 2" class="img-responsive center-block" />
+                </div>
+                <p>Now the question is from which component, these Microservices are made of?</p>
+                <p>Usually they are <strong>Containers</strong>. Containers are light-weight, fast and reliable application delivery technology.</p>
+                <blockquote>
+                    If you are not familiar with Container technology. Please refer to <a asp-controller="Docker" asp-action="IntroToDocker" target="_blank" class="underline">this</a> post for more information about containers in the context of Docker.
+                </blockquote>
+                <p>
+                    If we divide different application components in the form of containers, then how do we connect them with each other so that they can share data? How do we best utilize these Microservices across
+                    a number of scarce hardware resource? Say more appropriately, how do we <i>orchestrate</i> these Microservices in the application running in production? This is where we use <strong>Cluster Managers</strong>.
+                </p>
+                <h2 class="font-light">Cluster Managers</h2>
+                <p>
+                    A Cluster Manager, as the name implies, manages a cluster of Microservices or more specifically saying <i>a cluster of Containers</i>.
+                    <i>
+                        A cluster manager is a piece software, to whom we assign a number of VMs or scarce computing resources and <strong>with</strong> a cluster of Microservices
+                        and it intelligently manages those Microservices across those available scarce computing resources.
+                    </i>
+                </p>
+                <p>
+                    We usually communicate with the cluster manager through REST endpoint with our Dev machine. Let's understand what and how cluster managers can manage Microservices for us. Suppose we use a cluster manager to whom we assigned 4 VMs (for example). On our application side,
+                    we have 6 Microservices (In the form of Docker Containers) that we need in production.
+                </p>
+                <div>
+                    <img src="~/images/Docker/Microservices/Microservice3.png" alt="Micrservice 3" class="img-responsive center-block" />
+                </div>
+                <p>
+                    After assigning, the cluster manager will see each container's consumption power of computing resources and then it decides which container(s) should be placed where across these
+                    4VMs.
+                </p>
+                <p>
+                    For example, let's say the containers <strong>A</strong>, <strong>B</strong> and <strong>C</strong>, <strong>D</strong> require equal computing resources of a single VM and <strong>E</strong> and <strong>F</strong> require a
+                    full VM. So the cluster manager will assign VM1 to containers <strong>A</strong>, <strong>B</strong>, VM2 to containers <strong>C</strong>, <strong>D</strong>, VM3 to container <strong>E</strong> and VM4 to container <strong>F</strong>
+                    respectively.
+                </p>
+                <div>
+                    <img src="~/images/Docker/Microservices/Microservice4.png" alt="Micrservice 4" class="img-responsive center-block" />
+                </div>
+                <p>
+                    This is how Microservice architecture is configured using a cluster manager. Now what are the core benefits that we get while using this type of architecture? How it is different than the monolithic type?
+                    In a nutshell, it provides a great number of flexibility and agility in your application. Followings are the core benefits that we while adapting this type of architecture:
+                </p>
+                <ul class="font-light">
+                    <li>Improved resources utilizations which greatly reduces the costs in a cloud environment</li>
+                    <li>Each Microservice now can be debugged, fixed and delivered independently from others (Continuous Innovation)</li>
+                    <li>Each Microservice can be maintained by one team at a time</li>
+                    <li>A Microservice can be written in any programming language or framework such as one can be written in Django, another can be in Ruby etc.</li>
+                    <li>High availability and agility</li>
+                </ul>
+                <p>In more advanced scenario, Let's say Microservice <strong>D</strong> gets failed in production.</p>
+                <div>
+                    <img src="~/images/Docker/Microservices/Microservice5.png" alt="Micrservice 5" class="img-responsive center-block" />
+                </div>
+                <p>
+                    To fix this issue, the development team does not need to fix the whole block where the error occurred, instead the team should only fix the <strong>D</strong>
+                    Microservice and deliver it to the cluster manager without stopping the entire application running in production.
+                </p>
+                <div>
+                    <img src="~/images/Docker/Microservices/Microservice6.png" alt="Micrservice 6" class="img-responsive center-block" />
+                </div>
+                <p>
+                    Cluster Managers are also intelligent enough to understand and load balance between infrastructures and Microservices. For example,
+                    suppose the Microservice <strong>D</strong> increases load and requires more computing power then it has already, in that case, the cluster manager will shutdown that instance
+                    and port it from VM2 to VM3.
+                </p>
+                <div>
+                    <img src="~/images/Docker/Microservices/Microservice7.png" alt="Micrservice 7" class="img-responsive center-block" />
+                </div>
+                <p>
+                    This is how intelligently and efficiently Microservices are managed by <strong>Cluster Managers</strong>.
+                </p>
+                <h2 class="font-light">Available Cluster Managers</h2>
+                <p>
+                    There are variety of cluster managers available today which you can look at and choose the one that best suite your needs.
+                    Most of the cluster managers work differently depending upon the functionality that they offer. Here are some of the popular
+                    cluster managers that you can use on your on-premises, in the cloud or in your local data centers environments.
+                </p>
+                <ul class="font-light">
+                    <li><strong><i>Apache Mesos (Marathon):</i></strong> &emsp;<a href="http://mesos.apache.org/" target="_blank" class="underline">http://mesos.apache.org/</a></li>
+                    <li><strong><i>Cloud Foundry:</i></strong> &emsp;<a href="https://www.cloudfoundry.org/" target="_blank" class="underline">https://www.cloudfoundry.org/</a></li>
+                    <li><strong><i>Kubernetes:</i></strong> &emsp;<a href="http://kubernetes.io/" target="_blank" class="underline">http://kubernetes.io/</a></li>
+                    <li><strong><i>Docker Swarm:</i></strong> &emsp;<a href="https://docs.docker.com/swarm/" target="_blank" class="underline">https://docs.docker.com/swarm/</a></li>
+                    <li><strong><i>Azure Service Fabric:</i></strong> &emsp;<a href="https://azure.microsoft.com/en-us/services/service-fabric/" target="_blank" class="underline">https://azure.microsoft.com/en-us/services/service-fabric/</a></li>
+                </ul>
+                <p>
+                    We will see a real life example of Microservices and Cluster Managers in later posts. We will see <strong><i>Docker Swarm</i></strong> in details. Let's see, at first, that what is containers technology in the context of Docker
+                    from a very basic standpoint.
+                </p>
+                <div class="text-center">
+                    <a asp-controller="Docker" asp-action="IntroToDocker" class="btn btn-default font-light-text">Introduction to Docker</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+        <hr />
+    </div>
+</article>

@@ -1,0 +1,291 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Docker Compose";
+}
+
+<header class="intro-header orange-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">Docker Compose</h1>
+                    <hr class="small">
+                    <span class="subheading font-light">Fun with Compose using .NET Core and NGINX</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <h2 class="font-light">Multi-Container Apps</h2>
+                <p>
+                    <strong>Docker Compose</strong> is a tool (that comes with Docker) used to run multi-container applications. For example, you can have a web app in a container backed by a database container that is running in
+                    another container or there could be multiple instances of a web app container with a reversed-proxy container for static contents, load-balancing etc with a backing database.
+                </p>
+                <p>
+                    With Docker Compose, you can spin up multiple containers with their required configurations using a single Docker-CLI command. Docker Compose uses a compose YAML file to read <strong>Services</strong>
+                    (<strong>containers</strong> in other words) with configurations and spin up those services based on the YAML compose file. We use "<i>docker-compose</i>" CLI command to up and running with Compose.
+                </p>
+                <p>
+                    Here, we will see a very simple example of Docker Compose with <i>3 ASP.NET Core Web Applications</i> containers and <i>one NGINX reversed-proxy server</i> container which will load-balance HTTP traffic and port-forward among these 3 web apps using <strong>Docker Compose</strong>. We will be using <strong>Docker 1.12</strong> for this demo.
+                </p>
+                <p>
+                    I have 3 simplest ASP.NET Core Docker images on my local machine. You can use your own application image too. Each web app is exposing its service at the port <strong>5000</strong>, <strong>5001</strong> and <strong>5002</strong> respectively.
+                    We will build a custom NGINX Docker image which will hold our NGINX configuration as we will see next.
+                </p>
+                <div>
+                    <img src="~/images/Docker/Compose/compose1.png" class="img-responsive center-block" alt="Docker-Compose1" />
+                </div>
+                <p></p>
+                <h2 class="font-light">Setting Up Nginx Configurations</h2>
+                <p>
+                    Lets configure the NGINX server first for our case. Create a <strong>nginx.conf</strong> file in a directory and write the configuration as:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">nginx.conf</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+worker_processes  1;
+ 
+events {
+    worker_connections  1024;
+}
+ 
+http {
+    include       mime.types;   # include the required MIME types for NGINX
+    keepalive_timeout  65;  # connection timeout for worker_processes
+ 
+	upstream dotnetcore {
+		server aspnetcoreapp_A:5000;
+		server aspnetcoreapp_B:5001;
+		server aspnetcoreapp_C:5002;
+	}
+	
+    server {
+        listen       80;        # port to listen on
+        
+        location / {
+            proxy_pass http://dotnetcore;   # Home page for App1
+        }
+    }
+}
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    Notice that we are using the name of the containers (that we will define in a bit) instead of a domain or host name. Because we want to use the <strong>embedded Docker DNS Server</strong> which will look up for the services
+                    in our own <strong>User-defined Network</strong>. Embedded DNS does not work the same way as <strong>default bridge</strong> in a network. We are using here the NGINX default <strong>Round-Robin</strong> load-balancing algorithm for simplicity.
+                </p>
+                <p>
+                    Next, either use <strong>Docker Volume</strong> to mount Nginx configuration or create your own image which we are going to do here. Create a <strong>Dockerfile</strong> in the same directory and copy the <i>nginx.conf</i>
+                    file as:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">Dockerfile</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+FROM nginx
+COPY nginx.conf /etc/nginx/nginx.conf
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>And build the image with a name as:</p>
+                <pre>
+docker build -t nginx-core .
+</pre>
+                <p>Now we have the Nginx and ASP.NET Core Docker images ready. Lets write the Docker Compose file.</p>
+                <h2 class="font-light">Docker Compose</h2>
+                <p>
+                    As said earlier that Docker Compose uses a YAML file called <strong>docker-compose.yaml</strong> to configure and spin up services. If you are not familiar with YAML syntax, its pretty easy and is alternative to JSON and XML.
+                    Create a Compose file with the name <i>docker-compose.yml</i> with the following contents:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">docker-compose.yml</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+version: '2'
+
+services:
+  proxy:    # NGINX Service
+
+  aspnetcoreapp_A:  # Web App1 running at port 5000
+
+  aspnetcoreapp_B:  # Web App2 running at port 5001
+
+  aspnetcoreapp_C:  # Web App3 running at port 5002
+
+networks:
+  mynetwork:    # User-Defined Network with the name mynetwork
+    driver: bridge
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    First we define the version number of the Compose which is <strong>version 2</strong> in this case. Next we are defining 4 services here. 3 web app services, one Nginx Reversed-Proxy service with a user defined bridge network with the name <strong>mynetwork</strong>.
+                </p>
+                <p>Now we need to define the web application services <strong>with their name</strong> and put them into the same network that we just created i.e. <i>mynetwork</i> as:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">docker-compose.yml</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+version: '2'
+
+services:
+  proxy:
+
+  aspnetcoreapp_A:
+    image: aspnetcoreapp5000    # ASP.NET Core app running on port 5000
+    container_name: "aspnetcoreapp_A"   # Named service A
+    networks:
+      - mynetwork
+  
+  aspnetcoreapp_B:
+    image: aspnetcoreapp5001    # ASP.NET Core app running on port 5001
+    container_name: "aspnetcoreapp_B"   # Named service B
+    networks:
+      - mynetwork
+
+  aspnetcoreapp_C:
+    image: aspnetcoreapp5002    # ASP.NET Core app running on port 5002
+    container_name: "aspnetcoreapp_C"   # Named service C
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:    # User-Defined Network with the name mynetwork
+    driver: bridge
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    In the above Compose file, we configured 3 web app services. Each has a <strong>Image Name</strong>, <strong>Container Name</strong> and a <strong>Network</strong> section.
+                </p>
+                <p>
+                    Finally we define the NGINX service in the Compose file by exposing the port 80 from the container to the host at 8081 (because at 8080 Jenkins is running on my machine) and put it into our network. So the final Compose file will look like:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">docker-compose.yml</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+version: '2'
+
+services:
+  proxy:
+    image: nginx-core   # Our custom NGINX Docker image
+    container_name: "nginxcore"  # Name the service
+    ports: 
+      - "8081:80"   # Expose the port 80 from the service to the host at 8081
+    networks:
+      - mynetwork
+
+  aspnetcoreapp_A:
+    image: aspnetcoreapp5000    # ASP.NET Core app running on port 5000
+    container_name: "aspnetcoreapp_A"   # Named service A
+    networks:
+      - mynetwork
+  
+  aspnetcoreapp_B:
+    image: aspnetcoreapp5001    # ASP.NET Core app running on port 5001
+    container_name: "aspnetcoreapp_B"   # Named service B
+    networks:
+      - mynetwork
+
+  aspnetcoreapp_C:
+    image: aspnetcoreapp5002    # ASP.NET Core app running on port 5002
+    container_name: "aspnetcoreapp_C"   # Named service C
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:    # User-Defined Network with the name mynetwork
+    driver: bridge
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p></p>
+                <blockquote>
+                    Remember! You must have to put these services into a separate user-defined network because service discovery does not work on the default network.
+                    Also do not expose the ports of your web applications directly to the host. Instead, expose the reversed-proxy server (NGINX) ports to the host.
+                </blockquote>
+                <blockquote>
+                    The name of the containers and ports must match with the server names defined in the NGINX configuration.
+                </blockquote>
+                <p>Now open up the terminal and type:</p>
+                <pre>
+docker-compose up -d
+</pre>
+                <p>This will create a <strong>user-defined network "mynetwork"</strong>, spin-up the <strong>Web Apps</strong> and the <strong>NGINX</strong> container.</p>
+                <p>
+                    Navigate to the localhost:8081 in the browser and you will see our applications up and running.
+                </p>
+                <div>
+                    <img src="~/images/Docker/Compose/compose2.png" class="img-responsive center-block" alt="Docker-Compose2" />
+                </div>
+                <p>If I refresh the page, we can see that NGINX is forwarding the port at different web app containers running at different ports due to NGINX HTTP Load Balancing feature:</p>
+                <div>
+                    <img src="~/images/Docker/Compose/compose3.png" class="img-responsive center-block" alt="Docker-Compose3" />
+                </div>
+                <p></p>
+                <h2 class="font-light">Conclusion</h2>
+                <p>
+                    The example I showed here can be very useful in production use-case. I did everything here on one Docker host for understanding the basics. We can use this NGINX load-balancing in a Swarm Cluster
+                    (Although Load-Balancing is now supported by default in Docker 1.12 Swarm Mode). Also NGINX can be used in a Swarm cluster for <strong>SSL terminations</strong>, <strong>Routing based on the contents</strong>, <strong>Authorizations</strong>, <strong>Rewrites and Redirections</strong>.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>

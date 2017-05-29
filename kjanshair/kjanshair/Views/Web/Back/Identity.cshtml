@@ -1,0 +1,468 @@
+﻿@{
+    ViewBag.Title = "Identity";
+}
+
+<header class="intro-header green-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">ASP.NET Identity</h1>
+                    <hr class="small">
+                    <span class="subheading font-light">Basic Authentication and Authorization in ASP.NET Core 1.0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <p>Security is an important part of every web application. A web application can contain sensitive data that only authorized users can access. To do this, the users have to create their account and sign in to get access to their protected resources known as <strong>Form Authentication</strong>.</p>
+                <h2 class="font-light">Authentication and Authorization</h2>
+                <p>It is important to have an understanding of the difference between <i>Authentication</i> and <i>Authorization</i>. Authentication means that <strong>who the user is? Is the user is validated or not?</strong> and the Authorization means that <strong>whether a user has certain rights to access a protected resource or not! Or what a user can do?</strong></p>
+                <h2 class="font-light">ASP.NET Identity</h2>
+                <p>
+                    ASP.NET Identity is the Authentication\Authorization framework for ASP.NET. Here we will see a very basic example of Identity with Entity Framework Core backed by a Postgres database. We will see cookie authentication and policy-based authorization in action.
+                </p>
+                <p>
+                    I'll be using the same sample application for this example that I've been showing your throughout my blogs. You can get the sample application using
+                    Yeoman <i>"aspnetcore-example"</i> generator or you can use your own application.
+                </p>
+                <blockquote>
+                    Click <a asp-controller="Blog" asp-action="AspNetCoreSystem" target="_blank" class="underline">Here</a>, if you want to know about Yeoman Generators and my sample application.
+                </blockquote>
+                <p>
+                    If you see in the sample application, there are 2 controllers, an <i>AccountController</i> and a <i>HomeController</i>. We will use <i>AccountController</i> to register or login user sessions.
+                    In the <i>HomeController</i>, there is a <i>Protected()</i> action that we will allow to be access only by the Authenticated (and Authorized as we will see shortly) users. So lets get started.
+                </p>
+                <h2 class="font-light">Adding Identity</h2>
+                <p>
+                    First we need to add and configure Identity in our application. For this, open-up <i>Startup.cs</i> class, download and add the following services into the DI container (I've already done this for you in my sample application.).
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">Startup.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+        public void ConfigureServices(IServiceCollection services)
+        {
+            //Configure the context class and use Postgres provider with connection string got from appsettings.json file.
+            services.AddEntityFrameworkNpgsql()     //Add PostgreSQL provider
+                    .AddDbContext&ltApplicationDbContext&gt(options =>
+                       options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))); 
+
+            services.AddIdentity&ltApplicationUser, IdentityRole&gt() //Add Identity by defining types of Users and Roles.
+                .AddEntityFrameworkStores&ltApplicationDbContext&gt() //Specify the Entity Framework Data store
+                .AddDefaultTokenProviders(); //Add this for generating tokens for reseting password etc.
+
+            services.AddMvc();
+        }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>Next, go to "Models" folder, add <i>ApplicationUser.cs</i> class and derive it from the <i>IdentityUser</i> class. This class will represent a user in our application.</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">ApplicationUser.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    public class ApplicationUser : IdentityUser
+    {
+
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    This <i>ApplicationUser</i> class provides standard user properties such as Email, UserName, Password, PhoneNumber and others. If you want to add your own properties to suit your needs, you can extend
+                    this by adding the required properties to this <i>ApplicationUser.cs</i> class and then apply migrations (if you have created your database already).
+                </p>
+                <p>
+                    Next, our DbContext class is the <i>ApplicationDbContext.cs</i> class in the "Data" folder. This looks the same like context class of Entity Framework Core, but unlike EFCore, we
+                    derive this context class from <i>IdentityDbContext&ltApplicationUser&gt</i> rather than <i>DbContext</i> like:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">ApplicationDbContext</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    public class ApplicationDbContext : IdentityDbContext&ltApplicationUser&gt
+    {
+        public ApplicationDbContext(DbContextOptions&ltApplicationDbContext&gt options)
+            : base(options)
+        {
+
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+        }
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>Here you can create the database either using EF Migrations or use the <i>Database.EnsureCreated()</i> method in the constructor of the context class. We will use this second approach. So in the constructor of the context class, add:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">ApplicationDbContext</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    public class ApplicationDbContext : IdentityDbContext&ltApplicationUser&gt
+    {
+        public ApplicationDbContext(DbContextOptions&ltApplicationDbContext&gt options)
+            : base(options)
+        {
+            Database.EnsureCreated();   //Create the database first
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+        }
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p></p>
+                <blockquote>
+                    Make sure that the default Connection String in "<i>appsettings.json</i>" file matches with your Postgres instance.
+                </blockquote>
+                <p>
+                    Now Identity is setup. Next we have to add the User Register and Login capability in our sample application. So go to the <i>AccountController.cs</i> class in "Controllers" folder.
+                    Here you will see that I've already injected some of the DI services in the constructor for you. Lets start adding users in our application. We will look at the Authentication part first
+                    for s`implicity.
+                </p>
+                <h2 class="font-light">Authentication</h2>
+                <p>Now in the <i>HomeController.cs</i> class, decorate the <i>Protected()</i> action with the <strong>Authorize</strong> attribute as:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">HomeController.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    using Microsoft.AspNetCore.Authorization;
+
+    public class HomeController : Controller
+    {
+        ...
+        [HttpGet]
+        [Authorize] // Only Authenticate users can access this action
+        public IActionResult Protected()
+        {
+            return View();
+        }
+        ...
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>Now this action will only be accessible for Authenticated users. If any unauthenticated user will try to access it, the application will redirect it to the Login page.</p>
+                <p>Next, go to <i>AccountController</i> and lets add the functionality of user registration in the <strong>Register</strong> post action as:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">AccountController.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task&ltIActionResult&gt Register(RegisterViewModel model, string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+
+            if (ModelState.IsValid)
+            {
+                if (await _userManager.FindByEmailAsync(model.Email) == null)  // Find that whether the user exist already or not
+                {
+                    ApplicationUser user = new ApplicationUser() // Create a new user instance
+                    {
+                        UserName = model.Email,
+                        Email = model.Email
+                    };
+
+                    IdentityResult result = await _userManager.CreateAsync(user, model.Password); //Create a user in the database
+
+                    if (result.Succeeded)
+                    {
+                        //If user is created successfully, the _signInManager.SignInAsync() method will generate a token (Cookie)
+                        //based on which the user will be authenticated and redirect the user to the returnUrl that the user was trying to access
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return RedirectToLocal(returnUrl);
+                    }
+                    else
+                    {
+                        //If user creation is failed, return the view with errors
+                        AddErrors(result);
+                        return View(model);
+                    }
+                }
+                else
+                {
+                    //Add error, if the user exists already
+                    ModelState.AddModelError("", $"User {model.Email} already exist!");
+                    return View(model);
+                }
+            }
+            else
+            {
+                //Add Server-Side validations
+                ModelState.AddModelError("", $"Please add the required information.");
+                return View(model);
+            }
+        }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    What we are doing here is: First check that whether the user exists already? If not then create one. Upon successful creation, Sign In the user at line 21. This <i>SignInAsync()</i>
+                    method will generate a cookie in the browser that will be used by the application for user authentication.
+                </p>
+                <p>Now lets implement the <strong>Login</strong> functionality. In the <i>AccountController.cs</i>, add the following code in the Login post action as:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">AccountController.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task&ltIActionResult&gt Login(LoginViewModel model, string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+
+            if (ModelState.IsValid)
+            {
+                //Check whether the user exist or not
+                if (await _userManager.FindByEmailAsync(model.Email) == null)
+                {
+                    ModelState.AddModelError("", $"User {model.Email} does not exist!");
+                    return View();
+                }
+                else
+                {
+                    //If the user exists, sign in the user and generate a cookie
+                    var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+
+                    if (result.Succeeded)
+                    {
+                        //After successful login, redirect the user to a protected resource
+                        return RedirectToLocal(returnUrl);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                        return View(model);
+                    }
+                }
+            }
+            else
+            {
+                return View();
+            }
+        }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    Now we have set up the Authentication part. Try to run the application and navigate to <i>"/Home/Protected/"</i> action, you will see that you are
+                    redirected to the login page because you are not authenticated. But before login, you have to register yourself. So go to the <i>Register page</i>, register yourself and try to login.
+                    After authentication you will be able to access the <i>"/Home/Protected/"</i> action.
+                </p>
+                <h2 class="font-light">Authorization</h2>
+                <p>
+                    Now lets get into the 2nd (Authorization) part in ASP.NET Core. In ASP.NET Core, Authentication process is the same like that of ASP.NET MVC 5. But Authorization part in ASP.NET Core has change a lot.
+                    There are several ways that you can choose to authorize a user such as resource-based authorization, role-based, policy-based and others. You can find the complete list of different authorization ways <a href="https://docs.asp.net/en/latest/security/index.html" class="underline" target="_blank">here</a>
+                    at the official ASP.NET Core Documentation.
+                </p>
+                <p>
+                    Here, we will see Role-Based and Policy-Based Authorization in action just for the sake of simplicity. Continuing from where we left off in our application, go to the <i>HomeController.cs</i>
+                    and modify the Authorize attribute as:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">HomeController.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    using Microsoft.AspNetCore.Authorization;
+
+    public class HomeController : Controller
+    {
+        ...
+        [HttpGet]
+        [Authorize(Policy = "EmployeeOnly")] // Define the policy for this action to "AdministratorOnly"
+        public IActionResult Protected()
+        {
+            return View();
+        }
+        ...
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>Now if you navigate to this action (Even if you are a Authenticated user), you will get access denied message in the browser. It means you are an Authenticated user but you are not authorized to access this action.</p>
+                <p>
+                    To get authorization access, go to the <i>Startup.cs</i> class and define a <strong>policy</strong>. A policy is composed of one or more roles (or some other attributes) upon which the Identity decides
+                    which action has to be allowed to the user. In our example, we want the <i>Protected()</i> action to be access only by those who are <i>Employees</i>.
+                    So we will create just one Identity Role in our application named "Employee" and add this role statement to the Authorization Policy named with "EmployeeOnly".
+                </p>
+                <p>So, inn the <i>ConfigureServices()</i> method of <i>Startup.cs</i> class, add the following code:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">Startup.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddEntityFrameworkNpgsql()
+                    .AddDbContext&ltApplicationDbContext&gt(options =>
+                       options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddIdentity&ltApplicationUser, IdentityRole&gt()
+                .AddEntityFrameworkStores&ltApplicationDbContext&gt()
+                .AddDefaultTokenProviders();
+
+            //Define the Authorization Policy with required role
+            services.AddAuthorization(config => 
+            {
+                config.AddPolicy("EmployeeOnly", options => options.RequireRole("Employee")); 
+            });
+
+            services.AddMvc();
+        }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p></p>
+                <blockquote>
+                    Be careful about the order in which the middlewares are being used.
+                </blockquote>
+                <p>
+                    Now go the <i>AccountController.cs</i> and modify the <i>Register()</i> post action such that each user adds to an <i>Employee</i> Role while registering by default.
+                    So modify the Register post action as:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">AccountController.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task&ltIActionResult&gt Register(RegisterViewModel model, string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            ...
+                    ApplicationUser user = new ApplicationUser()
+                    {
+                        UserName = model.Email,
+                        Email = model.Email
+                    };
+
+                    await _userManager.CreateAsync(user, model.Password); // Create the user
+                    await _roleManager.CreateAsync(new IdentityRole("Employee")); // Create an "Employee" role
+
+                    IdentityResult result = await _userManager.AddToRoleAsync(user, "Employee"); // Add current user to "Employee" role
+
+                    if (result.Succeeded)
+                    {
+                        //If user is created successfully, the _signInManager.SignInAsync() method will generate a token (Cookie)
+                        //based on which the user will be authenticated and redirect the user to the returnUrl that the user was trying to access
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return RedirectToLocal(returnUrl);
+                    }
+             ...
+        }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>Now if you create a new entry, you will be add to <i>Employee</i> Role by default and you will be able to access <i>Protected()</i> action according to the policy that we defined in <i>Startup.cs</i> class.</p>
+                <p>
+                    In ASP.NET Core, Authorization has been changed a lot. Authorization is now more secure and unit test-able. You can now even bring additional Authorization policies using NuGet.
+                    For further information about ASP.NET Core Authorization, checkout Barry Dorrans Authorization Workshop <a href="https://github.com/blowdart/AspNetAuthorizationWorkshop" class="underline" target="_blank">Here</a>.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+        <hr />
+    </div>
+</article>

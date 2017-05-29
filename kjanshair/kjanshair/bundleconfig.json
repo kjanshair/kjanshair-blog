@@ -1,0 +1,42 @@
+[
+  {
+    "outputFileName": "wwwroot/css/site.min.css",
+    "inputFiles": [
+      "wwwroot/css/site.css"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/site.min.js",
+    "inputFiles": [
+      "wwwroot/js/site.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    }
+  },
+  {
+    "outputFileName": "wwwroot/application/application.min.css",
+    "inputFiles": [
+      "wwwroot/css/clean-blog.css",
+      "wwwroot/css/site.css",
+      "wwwroot/lib/animate.css/animate.css",
+      "wwwroot/css/tomorrow.min.css",
+      "wwwroot/css/bootstrap-social.css"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/application/application.min.js",
+    "inputFiles": [
+      "wwwroot/js/clean-blog.js",
+      "wwwroot/js/prettify.js",
+      "wwwroot/js/site.js"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/app.min.js",
+    "inputFiles": [
+      "wwwroot/js/app.js"
+    ]
+  }
+]

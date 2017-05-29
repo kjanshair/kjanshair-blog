@@ -1,0 +1,167 @@
+﻿@{
+    ViewBag.Title = "Acquisition";
+}
+
+<header class="intro-header orange-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">Acquisition</h1>
+                    <hr class="small">
+                    <span class="subheading">All you need for up and running with ASP.NET Core!</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <p>
+                    I'm writing this short post for those folks who are new to .NET Core ecosystem. I attended some seminars and a couple of hands-on-labs where I saw some folks did not install (and even don't know about) Bower package manager,
+                    some did not install NPM and some even .NET Core itself. So I thought it would be better if I write a small blog post to get you familiar with these tools than telling everyone individually. Here we'll see what and why we need certain things to get our system ready for ASP.NET Core.
+                </p>
+                <blockquote>It would be better if you follow the steps.</blockquote>
+                <hr />
+                <h3 class="font-light"><img src="~/images/Blogs/Get-ReadyAspNetCore/git.png" alt="git" /></h3>
+                <p>The very first thing you need to install is <strong>Git Source Control</strong> which is the central part for all the tools that will use. Git is a version control system, it tracks and manages your changes in your project files or in a team project. All the subsequent tools  rely on Git. You can get Git either from Chocolatey (A package manager for Windows) or directly from <a href="https://git-scm.com/downloads" class="underline" target="_blank">here.</a></p>
+
+                <hr />
+                <h3 class="font-light"><img src="~/images/Blogs/Get-ReadyAspNetCore/npm.png" alt="npm" /></h3>
+                <p>The second important thing you need is NPM (Node Package Manager). NPM is a package manager like Bower and NuGet. You can install NPM by download and installing Node.js for your particular system from <a href="https://nodejs.org/en/" class="underline" target="_blank">here</a>. Node.js comes with NPM. Node.js is a different Web Framework, we will merely use NPM Package Manager to usually get the followings:</p>
+                <ul class="list-group font-light">
+                    <li class="list-group-item">Bower Package Manager</li>
+                    <li class="list-group-item">Grunt\Gulp Build System and other tools like Webpack etc.</li>
+                    <li class="list-group-item">Yeoman and Generators</li>
+                </ul>
+                <p>After installing Node.js, you can see whether NPM is installed successfully or not by typing in the terminal:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm --version
+</pre>
+                </div>
+                <p>This will display the installed version of NPM.</p>
+
+                <hr />
+                <h3 class="font-light"><img src="~/images/Blogs/Get-ReadyAspNetCore/bower.png" alt="bower" /> </h3>
+                <p>Bower is a Client-Side package manager. It is used for manage client-side dependencies. Rather than manually downloading a client-side tool (like JavaScript libraries or frameworks such as jQuery or React) from their website, Bower is a much better tool. It provides simple CLI for installing, un-installing and updating a package. We install Bower via NPM, so open-up the terminal and type:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm install -g bower
+</pre>
+                </div>
+                <p>This will install bower globally on your system (If you apply -g flag with the command). You can check for successful installation by typing in the terminal:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+bower --version
+</pre>
+                </div>
+                <p>This will display the current version of Bower in the terminal.</p>
+                <hr />
+                <h3 class="font-light"><img src="~/images/Blogs/Get-ReadyAspNetCore/buildsystem.png" alt="build-system" /></h3>
+                <p>Build Systems help us to do repetitive tasks that needs to be perform repeatedly such as concatenating and minifying CSS and JavaScript files, compiling LESS, SASS or CoffeeScript files to CSS or JavaScript each time. Performing these stuff manually each time can be tedious. This is where we use <strong>Build Systems</strong>. Build Systems provides CLI that we to performs tasks like these repeatedly. There are 2 popular Build Systems available <strong>Gulp</strong> and <strong>Grunt</strong>. They are also installed via NPM. You can choose any of them, both can be used in ASP.NET Core. To install Gulp or Grunt, type in the terminal:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm install -g grunt-cli    //for Grunt
+</pre>
+                </div>
+                <br />
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm install -g gulp-cli     //for Gulp
+</pre>
+                </div>
+                <p>This will install Grunt or Gulp globally in your system. After installation, you can check for successful installation by typing in the terminal:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+gulp --version
+</pre>
+                </div>
+                <p>This will show the current version of Gulp installed on your system. <i>Use Grunt in the command for checking Grunt successful installation.</i></p>
+                <blockquote>I've written a blog post for getting started with a build system (Grunt example) in action that you can read from <a asp-controller="Web" asp-action="Grunt" target="_blank" class="underline">here</a>.</blockquote>
+                <p>
+                    ASP.NET Core can also use a new and light-wight Build System <strong>Bundler and Minifier</strong> from Microsoft. This is added via NuGet not via NPM. Also you have to add <strong>Bundler and Minifier</strong> tool in your project.json like:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">project.json</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+  "tools": {
+    "BundlerMinifier.Core": "2.0.238",
+    ...
+    ...
+  },
+</pre>
+                        </div>
+                    </div>
+
+                </div>
+                <p>
+                    The documentation for Bundler and Minifier can be found <a href="https://github.com/madskristensen/BundlerMinifier" class="underline" target="_blank">here</a>.
+                </p>
+                <hr />
+                <h3 class="font-light"><img src="~/images/Blogs/Get-ReadyAspNetCore/yeoman.png" alt="Yeoman" />(Optional but Recommended)</h3>
+                <p>Yeoman is a web scaffolding tool. Yeoman is used to generate (Scaffold out) a project using Yeoman generators. We use Yeoman CLI to scaffold out a project. You can generate any other technology project if it is available as Yeoman Generators. Yeoman is also installed via NPM. To install Yeoman, type in the terminal as:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm install -g yo
+</pre>
+                </div>
+                <p>This will begin installing Yeoman on your local system. After some time, you can check for successful installation by typing in the terminal: </p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+yo --version 
+</pre>
+                </div>
+                <p>This will display the current version of Yeoman that is installed on your system.</p>
+                <p>After installing Yeoman, you install Yeoman Generators to scaffold projects. Yeoman Generators are also installed as NPM modules. There are generators available from official Yeoman community and from 3rd party that you can find <a href="http://yeoman.io/generators/" target="_blank" class="underline">here</a>. There is a Yeoman Generator that is created by Microsoft for generating .NET Core applications and Unit Testing projects. It is recommended that you install this generator. To install, type in the terminal:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm install -g generator-aspnet
+</pre>
+                </div>
+                <br />
+                <blockquote>Note the flag "generator", this represents a Yeoman Generator as the Yeoman Generators are conventionally represent as [generator]-[name] in NPM ecosystem.</blockquote>
+                <blockquote>I have created a Yeoman Generators that I'll be using through my blogs. You can get the generator by typing in the terminal "npm install -g generator-aspnetcore-example".</blockquote>
+
+                <hr />
+                <h2 class="font-light">.NET Core 1.0</h2>
+                <p>To install .NET Core on your local system, you can go to <a href="https://www.microsoft.com/net" class="underline" target="_blank">http://dot.net</a>, click on the .NET Core link and they will guide you through a step by step for installing .NET Core on Windows, Linux, OS X and Docker. Therefore I won't show you here how to install .NET Core.</p>
+                <hr />
+                <h2 class="font-light">ASP.NET Core 1.0</h2>
+                <p>ASP.NET Core apps at their central are .NET Core Console apps. Therefore there is no separate installation of ASP.NET Core. If you have installed .NET Core, you can up and running with ASP.NET Core. Checkout <a asp-controller="Fundamentals" asp-action="SmallAspNetCoreApp" class="underline" target="_blank">here</a>, if you want to see how to create a most basic ASP.NET Core MVC 1.0 application from a C# Console App.</p>
+                <p>If you are using Visual Studio, don't forget to install <a href="https://www.microsoft.com/net" class="underline" target="_blank">Visual Studio MSI Installer</a> for installing latest ASP.NET Core tooling for Visual Studio.</p>
+                <blockquote>
+                    These tooling require at least Visual Studio 2015 with Update 3.
+                </blockquote>
+                <hr />
+                <h2 class="font-light">A Text Editor</h2>
+                <p>The final thing you need is a Text Editor. You can use a variety of Text Editors for developing ASP.NET Core applications. Now you are not tied to Visual Studio to develop an ASP.NET Core application. You can use <a href="https://www.sublimetext.com/" class="underline" target="_blank">Sublime</a>, <a href="https://www.gnu.org/software/emacs/" target="_blank" class="underline">EMACS</a>, <a href="https://atom.io/" class="underline" target="_blank">Atom</a>, <a href="http://brackets.io/" class="underline" target="_blank">Brackets</a>, <a href="https://code.visualstudio.com/" class="underline" target="_blank">Visual Studio Code</a> and Visual Studio off course.</p>
+                <p>After choosing a Text Editor of your choice, it is recommended that you install <a href="http://www.omnisharp.net/" class="underline" target="_blank">OmniSharp</a> extension for your Text Editor. OmniSharp is a community project which helps to support .NET Core tooling (C# Intellisense and code snippets, for example) in different text editors to speedup development time. </p>
+                <p>
+                    If you are a Windows user, Visual Studio is still the best choice. In Visual Studio, don't forget to install <strong><i>Web Extension Pack</i></strong> extension for Visual Studio. You then probably don't need to use Grunt\Gulp after installing this extension.
+                </p>
+                <hr />
+                <h2 class="font-light-text text-center">That's All! <i class="fa fa-thumbs-o-up" aria-hidden="true"></i></h2>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>

@@ -1,0 +1,145 @@
+﻿@{
+    ViewBag.Title = "Docker in CoreOS";
+}
+
+<header class="intro-header green-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <img class="center-block img-responsive" src="~/images/Cloud/coreosdocker/1.gif" />
+                    <hr class="small">
+                    <span class="subheading font-light">Container Linux + Docker</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <p>
+                    A Docker engine usually requires a Host Operating System (i.e. A Linux distro) whose Kernel services and resources can be used by the Docker containers.
+                    But a typical Linux OS also has other services as well which Docker engine does not need such as <i>services</i>, <i>package formats</i> etc. What happens if we run a Docker engine in 
+                    a cluster of typical Linux distribution (such as Ubuntu) for production use in the cloud?
+                </p>
+                <p>
+                    This may effect the <strong>Cost</strong> as you have to pay for resource utilizations either per minute or hourly
+                    for the computing resources that you utilize. Also may affect the <strong>Performance</strong> a bit in production as there are also other services running inside a typical Linux distro.
+                    Wouldn't it be nice if we use an OS that just has the components necessary for hosting a Docker engine only and discard other services? 
+                    This is where we take a look at <strong>Container Linux</strong> (formerly called <strong>CoreOS</strong>).
+                </p>
+                <h2 class="font-light">What is Container Linux?</h2>
+                <p>
+                    Container Linux is an open-source <i>minimal Linux distro</i> designed specifically to run <i>containers</i> removing all the components unnecessary for Docker engine and other container runtime engines. Container Linux provides 2 core
+                    container runtime engines <strong><i>Docker</i></strong> and <strong><i>rkt</i></strong> and are consider at the heart of Google Kubernetes (a container orchestration engine). With Container Linux and Kubernetes,
+                    CoreOS.Inc provides a stack called <a href="https://coreos.com/tectonic/" target="_blank" class="underline"><strong>Tectonic</strong></a> which is a <i>self-driving</i> (i.e. Automatic updates, Update to date with Kubernetes and security patches) infrastructure for running containers.
+                    So, in a nutshell, this is how a typical Container Linux operating system is different from other Linux distros (i.e. Ubuntu) in the context of Container Runtime (Docker Engine).
+                </p>
+                <div>
+                    <img src="~/images/Cloud/coreosdocker/6.png" class="img-responsive center-block" />
+                </div>
+                <p></p>
+                <h2 class="font-light">Setting up Container Linux in Microsoft Azure</h2>
+                <p>
+                    Navigate to Azure Portal, go to <i>Marketplace</i> and search for <strong>CoreOS</strong>.
+                </p>
+                <div>
+                    <img src="~/images/Cloud/coreosdocker/2.png" class="img-responsive center-block"/>
+                </div>
+                <p>
+                    You will get 3 different versions of CoreOS in the Marketplace <i>Stable</i>, <i>Beta</i> and <i>Alpha</i>. <strong>Stable</strong> is the version of Container Linux ready for use in production and contains a specific version of Docker Engine.
+                    <strong>Beta</strong> is the completed stage of <strong>Alpha</strong> which can be used in production but are not recommended and finally <strong>Alpha</strong> contains the most recent version of Docker and other
+                    update patches. Alpha is also released more frequently than Beta and Stable. For this demo, click the <strong>Stable</strong> version and click <i>Create</i>:
+                </p>
+                <div class="col-md-12 col-lg-12 col-sm-12 col-xs-12">
+                    <p class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        Fill out the details in the Basic blade and choose a VM size. You may notice that we still are getting the same VM sizes and other components (like VM Sizes, SGs, VNets and Storage options) for setting up Container Linux that we usually used to provision a full Linux distro Azure VM. The reason is, actually,
+                        we have to choose a VM size not specific to a Linux distribution but rather those provided by Microsoft Azure. So choose a VM size (I choose Standard DS1_V2 for this demo) and click <i>Select</i>.
+                    </p>
+                    <img src="~/images/Cloud/coreosdocker/3.png" class="img-responsive center-block col-lg-6 col-md-6 col-sm-12 col-xs-12" />
+                </div>
+                <p>
+                    Fill out the other fields in the <i>Settings</i> blade (i.e. VNet, Public IP, Storage etc) and then click Create in the <i>Summary</i> blade to start provisioning the VM. 
+                </p>
+                <p>
+                    After VM is provisioned, login into the machine through your SSH Client and you will get a pretty nice message at the top of your <i>username@@server</i>, something like in my case:
+                </p>
+                <pre>
+Container Linux by CoreOS stable (1298.6.0)
+kjanshair@kjanshair ~ $
+</pre>
+                <p>
+                    Let's first type the command "<i>free -m</i>" in the terminal to see how much of the RAM being used by the root system under buffer and caches, you may get something like:
+                </p>
+                <pre>
+kjanshair@kjanshair ~ $ free -m
+             total       used       free     shared    buffers     cached
+Mem:          3443        418       3025          0         51        168
+-/+ buffers/cache:        151       3245
+Swap:            0          0          0
+kjanshair@kjanshair ~ $
+</pre>
+                <p>Ahan! Just 151 Megabytes are being used where as a typical <i>Azure Standard DS1_V2</i> Linux VM provides 3+ Gigabytes RAM. That's too low. Now if you type the command <i>df -h</i> to check the disk space used by the root partition of OS disk, you get something like:</p>
+                <pre>
+kjanshair@kjanshair ~ $ df -h
+Filesystem       Size  Used Avail Use% Mounted on
+tmpfs            1.7G     0  1.7G   0% /sys/fs/cgroup
+/dev/sda9         28G   32M   26G   1% /
+/dev/mapper/usr  985M  633M  302M  68% /usr
+tmpfs            1.7G     0  1.7G   0% /tmp
+/dev/sda1        128M   40M   89M  31% /boot
+</pre>
+                <p>
+                    As you can see, the root partition used by the Container Linux is just 633 Megabytes as in a Container Linux machine, the OS itself is mounted as a read-only partition at <i>/usr</i>.
+                </p>
+                <p>
+                    If you type other Linux commands such as <i>service</i>, <i>systemd</i> etc, you get an error saying "command not found" because this, as said earlier, is the minimal Linux distro for running containers. But if you type Docker specific commands, you get a response:
+                </p>
+                <pre>
+kjanshair@kjanshair ~ $ docker --version
+Docker version 1.12.6, build d5236f0
+</pre>
+                <p></p>
+                <div class="col-md-12 col-lg-12 col-sm-12 col-xs-12">
+                    <p class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        Now we are logged into the machine, next allow the port <i>HTTP</i> in the Network Security Group (NSG) attached with NIC of VM that we just provisioned. This will allow you to access HTTP port 80 of your VM through the Internet. By default, you get only the <i>SSH</i> port 22 opened
+                        for logging remotely into the instance.
+                    </p>
+                    <img src="~/images/Cloud/coreosdocker/4.png" class="img-responsive center-block col-lg-6 col-md-6 col-sm-12 col-xs-12" />
+                </div>
+                <p>
+                    After you logged in, pull a Docker image from a registry like Docker Hub. For this demo, I will use my own simplest ASP.NET Core Docker image available at Docker Hub by typing:
+                </p>
+                <pre>
+sudo docker pull kjanshair/aspnetcore-example
+</pre>
+                <p>And run a Docker container from this image as:</p>
+                <pre>
+sudo docker run -d --name app -p 80:80 kjanshair/aspnetcore-example
+</pre>
+                <p>Now open-up a browser and access your application using the IP address of your VM on port 80 and you will see the application up and running:</p>
+                <div>
+                    <img src="~/images/Cloud/coreosdocker/5.png" class="img-responsive center-block" />
+                </div>
+                <p></p>
+                <h2 class="font-light">Conclusion</h2>
+                <p>
+                    Using Container Linux as the Host OS for your cluster can be effective in cost, performance and CI\CD pipeline. In the case of a Docker Swarm Cluster, Container Linux can be think of as a secure, 
+                    fast and high-performance OS than a typical Linux distro. There are also other Container base OS available out there, such as <a href="http://www.projectatomic.io/" class="underline" target="_blank"><strong>Project Atomic</strong></a>,
+                    <a href="http://rancher.com/rancher-os/" target="_blank" class="underline"><strong>RancherOS</strong></a> and others.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>

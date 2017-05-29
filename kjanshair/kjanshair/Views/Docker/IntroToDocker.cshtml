@@ -1,0 +1,136 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Introduction to Docker";
+}
+
+<header class="intro-header blue-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <img class="img-responsive center-block" src="~/images/Docker/IntroToDocker/docker-title.png" alt="Docker"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <h2 class="font-light">What is Docker?</h2>
+                <p>
+                    Docker is a light-weight, reliable and fast containerization technology. It greatly helps us to reduce the overhead of spinning-up a new Virtual Machine (VM),
+                    building Microservices Architectures, packaging, configuring and delivering application units in different environments.
+                </p>
+                <h2 class="font-light">Docker Examples</h2>
+                <p>
+                    Docker is a <i>Container Base</i> application packaging and delivery technology. In Docker, <strong>applications run in containers</strong>. Now the question is why containers?
+                    As we see in real world that if a country wants to export a number of stocks to another country, they put them into containers then they ship those containers either by road or through the dock to another country.
+                </p>
+                <div class="col-xs-12 col-sm-12 col-md-6">
+                    <img src="~/images/Docker/IntroToDocker/Container-Truck.png" class="img-responsive" alt="Container-Truck" />
+                </div>
+                <div class="col-xs-12 hidden-md hidden-sm hidden-lg">
+                    <br />
+                    <hr />
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-6">
+                    <img src="~/images/Docker/IntroToDocker/shipment-ship.png" class="img-responsive" alt="Container-ship" />
+                    <br />
+                </div>
+                <p>In containers, every stock is placed such that it does not get damaged upon small jerks and everything is placed safely regardless of where the container is moving.</p>
+                <p>
+                    The same above analogy applies to Docker. Docker encapsulates applications into a small running container with all of your application's bins\libs and dependencies
+                    and isolates it from the host machine. Docker Containers are based on Docker images as we will see what is a Docker image and the anatomy of a running Docker container in a while.
+                </p>
+                <h2 class="font-light">Docker Containers and Virtual Machines (VMs)</h2>
+                <p>
+                    It is important to note that <strong>Containers are not VMs</strong>. If see VMs and containers in the context of application delivery, we see that Docker saves us from a Guest OS and Hyper-visor overhead.
+                    We need not to use any Guest OS to test or run our application while using Docker.
+                </p>
+                <div>
+                    <img src="~/images/Docker/IntroToDocker/Docker-Infrastructure.png" class="img-responsive center-block" alt="Docker-Architecture" />
+                </div>
+                <p>As we can see that VMs must require a Guest OS which increases a lot of overhead over the computing power. VMs usually have the following drawbacks:</p>
+                <ul class="font-light">
+                    <li>You've to spin up a whole new virtual machine and install a required licensed OS to just run your single application.</li>
+                    <li>You've to configure and install all the binaries and libraries for your application manually each time.</li>
+                    <li>They have a lots of overhead over your computing power.</li>
+                    <li>Though they are portable across different hyper-visors and are isolated from their host machine but they have large file size in the terms of portability. </li>
+                </ul>
+                <p>
+                    Docker Containers can save us from those heavy lifting. Also it becomes complicated and costly in the cloud world. Containers share the same services (such as file systems) and bin\libs (if necessary) of the host machine with all containers. Docker uses
+                    common Linux features namespaces and others, to isolate the application from the host machine and package them into an image. Containers offer fast startup time, more light-weight and fast application deployment and delivery.
+                    Calling containers as alternative to virtualization technology might not be appropriate.
+                </p>
+                <h2 class="font-light">Docker Components</h2>
+                <p>Now lets see some of the core building blocks of Docker in order to work around it properly.</p>
+                <p>Docker, in general, is composed of 5 core components:</p>
+                <ul class="font-light">
+                    <li>Docker Host</li>
+                    <li>Docker Engine</li>
+                    <li>Docker Client</li>
+                    <li>Docker Image and Dockerfile</li>
+                    <li>Docker Registry and Docker Hub</li>
+                </ul>
+                <p>
+                    <strong>Docker Host</strong> in Docker contains all the Linux features that is used to isolate applications from the host machine. <strong>Docker Engine</strong>
+                    sits inside of Docker Host, Docker Engine initiates Docker on our system (because Docker natively runs on Linux) and is responsible for creating, starting, removing and managing containers. It is also sometimes referred to as <strong>Docker Daemon</strong>.
+                    We use <strong>Docker Client</strong> on our Host machine to talk to Docker Engine to create, build and run containers.
+                </p>
+                <div>
+                    <img src="~/images/Docker/IntroToDocker/Docker-Components.png" class="img-responsive center-block" alt="Docker-Architecture" />
+                </div>
+                <p>
+                    As said that applications run in containers. A Docker container is made by writing a <strong>Docker Image</strong>. The Docker image is made by a <strong>Dockerfile</strong>. A Docker Image, in a nutshell, is a recipe or blueprint of a running Docker container. Dockerfile is usually composed of different Linux commands for creating a Docker image.
+                    Docker Images are then processed by Docker Engine or Docker Daemon to create running instances of Docker Images (if we run the container) in the form of Docker containers.
+                </p>
+                <div>
+                    <img src="~/images/Docker/IntroToDocker/Docker-Containerization.png" class="img-responsive center-block" alt="Docker-Containerization" />
+                </div>
+                <p>
+                    After writing Dockerfiles and creating Docker images, we can push those images to <strong>Docker Registry</strong> for distributing our applications either publicly or privately. Think of it as GitHub for hosting Git repositories. With Docker Registry,
+                    we can share Docker Images with other people or create running instances of these images in the cloud for production applications (such as in ACS and DigitalOcean etc).
+                    The default Docker Registry is <strong>Docker Hub</strong> where we can find a number of Docker images from Docker officially and from some third party vendors.
+                </p>
+                <p>Docker Engine (Docker Daemon) loads the Docker image (that was created using Dockerfile) into a Docker Container. Containers are the running instances of Docker Images.</p>
+                <p>There are other Docker applications available such as:</p>
+                <ul class="list-group font-light">
+                    <li class="list-group-item"><strong>Docker Compose</strong>, for managing multi-container applications.</li>
+                    <li class="list-group-item"><strong>Docker Cloud</strong>, for building and deploying Docker containers in the cloud such as ACS or Kubernetes.</li>
+                    <li class="list-group-item"><strong>Docker DTR (Docker Trusted Registry)</strong>, A hosted registry service for managing and building images.</li>
+                </ul>
+                <p>And other. We will see them in later posts.</p>
+                <h2 class="font-light">Installing Docker</h2>
+                <p>Installing Docker for your particular system is easy, just go to <a class="underline" target="_blank" href="https://docs.docker.com/">https://docs.docker.com/</a>, click on Docker for your system and you will find a step by step guide for installing Docker.</p>
+                <blockquote>
+                    Docker for Windows and Mac use Hyper-V and Hyperkit, respectively. Make sure that they are installed and enabled.
+                </blockquote>
+                <blockquote>
+                    You can also use Docker Toolbox for Windows and Mac which requires VirtualBox to be installed on your system. I'll be using Docker 1.12. Docker Toolbox requires the terminal to be configured as Docker-Client each time you start an instance of it.
+                </blockquote>
+                <p>
+                    It should be noted that by installing or enabling a Hyper-Visor such as Hyper-V or VirtualBox does not meant to be use the same traditional way of virtualization. We are using just one VM known as <strong>MobyLinux</strong> instance, which has enough capability to initiate Docker Host.
+                    If you are using Docker for Windows or Mac, this VM will be created for you in Hyper-V (For Windows) or HyperKit (For Mac OS) automatically.
+                </p>
+                <p>Now we have sufficient understanding of different Docker components. Lets see them in action and see how we can use Docker for running a simple ASP.NET Core 1.0 application in a Docker container.</p>
+                <div class="text-center">
+                    <a asp-controller="Docker" asp-action="DockerizeAspNetCore" class="btn btn-default font-light-text">Dockerize ASP.NET Core Application</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+        <hr />
+    </div>
+</article>

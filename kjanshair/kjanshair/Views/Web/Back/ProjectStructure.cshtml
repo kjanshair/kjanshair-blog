@@ -1,0 +1,96 @@
+﻿@{
+    ViewBag.Title = "Core Project Structure";
+}
+
+<header class="intro-header red-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">ASP.NET Core 1.0</h1>
+                    <hr class="small">
+                    <span class="subheading font-light">Basic ASP.NET Core Project Structure</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <p>ASP.NET Core is a web development framework, it provides a flexible application life-cycle with a super fast application development work-flow. Here, we will show you the most basic ASP.NET Core 1.0 project structure (Not just for Visual Studio).</p>
+                <p>In ASP.NET Core, several new components have been introduced which may not be familiar for those who worked with prior versions of ASP.NET family. For instance, the wwwroot folder, appsettings.json, ViewComponents, project.json, Startup class, Program.cs class and other.</p>
+                <h2 class="font-light">ASP.NET Core Project Structure</h2>
+                <p>When we create a new blank project of ASP.NET Core in VS 2015, we see the following structure at the start.</p>
+                <div class="center-block">
+                    <img src="~/images/Web/Back/projectStructure/projectstructure.png" alt="Project Structure" class="img-responsive" />
+                </div>
+                <p>Here we see a couple of things like wwwroot, Dependencies, Startup class and project.json (Although we see some other things like "References" and "Properties" these are the common parts of the .NET applications so we won't discuss them). Lets discuss these new stuffs what they are!</p>
+
+                <h3 class="font-light"><img src="~/images/Web/Back/projectStructure/projectjson.png" alt="wwwroot" /> project.json</h3>
+                <p>
+                    The first file that we need to consider is <strong>project.json</strong>. project.json file is used to maintain CoreFx dependencies in your project the same as with bower.json or package.json packages and modules. We add\remove packages and add toolings support in this file so that we can use them in our project. You might
+                    have already seen this file in UWP applications if you have worked on it before.
+                </p>
+
+                <h3 class="font-light"><img src="~/images/Web/Back/projectStructure/icon-root.png" alt="wwwroot" /> wwwroot folder</h3>
+                <p>ASP.NET Core has a new way for keeping static content into the project. In previous versions of ASP.NET, there was no application root level service to keep static files separate from routing URLs. In ASP.NET Core that wwwroot folder is where we put our static contents and libraries so that they are accessible right from the root of the project.</p>
+                <blockquote>
+                    To enable Static Files feature in ASP.NET Core 1.0, you've to add NuGet package and configure it in Configure() method by adding app.UseStaticFiles() method.
+                </blockquote>
+
+                <h3 class="font-light"><img src="~/images/Web/Back/projectStructure/icon-dependencies.png" alt="dependencies" /> Dependencies</h3>
+                <p>Dependencies section is used to manage Bower and NPM tooling packages dependencies in your project. For example, Bower for client-side packages with their dependencies (i.e. jQuery, Bootstrap, Angular). Bower has bower.json file which contains all the packages and dependencies that have installed. So Bower and NPM dependencies appear here in this section.</p>
+
+                <blockquote>
+                    <a href="http://bower.io/" target="_blank">Bower</a> and <a href="https://www.npmjs.com/" target="_blank">NPM</a> are not tied to ASP.NET Core, they are open source technologies which can be used in ASP.NET Core.
+                </blockquote>
+
+                <h3 class="font-light"><img src="~/images/Web/Back/projectStructure/startup.png" alt="programcs" /> Program.cs class</h3>
+                <p>
+                    Program.cs class is the most important file in ASP.NET Core. If you open this file and see the code, you will find that this class contains a Main() method which looks quite familiar with that you have been seeing in C# Console Apps.
+                    ASP.NET Core 1.0 applications at their core are Console applications which has a well-defined entry point like that of Console Apps.
+                </p>
+                <p>
+                    This class is used to initiate, build, run the server (IIS and Kestrel) and host the application. We also define the root of the project here.
+                    Every piece in this class is available as a NuGet package, there is no need to download ASP.NET Core separately than .NET Core. I've also written a blog <a asp-controller="Fundamentals" asp-action="SmallAspNetCoreApp" class="underline">here</a> where you can find that how to create a most basic ASP.NET Core MVC application from a C# Console App.
+                </p>
+                <h3 class="font-light"><img src="~/images/Web/Back/projectStructure/startup.png" alt="startupcs" /> Startup.cs Class</h3>
+                <p>Startup class is also another important file. It has 2 methods <i>ConfigureServices()</i> and <i>Configure()</i>. This class basically is used to configure middlewares on the request pipeline. We also use this as a Dependency Injection Container (DI Container) for ASP.NET Core as it is integrated in ASP.NET Core. We add and configure Middlewares in Startup class's <i>Configure()</i> method. Middlewares are essentially small piece of code that is executed whenever a request comes into your application. Read below to understand Middlewares.</p>
+
+                <h2 class="font-light">Middlewares in ASP.NET Core</h2>
+
+                <p>The concept of Middlewares might be a difficult to understand for beginners. So I thought it would be better to mention them in a little bit details here.</p>
+                <p>Middlewares, as said earlier, are small piece of code that is executed whenever a request comes into your website. You then decide what has to be done based upon the request. Lets say you have a middleware that is used to look for unrecognized paths in your website (just for example).</p>
+                <p>If that middleware find a path that is not part of your application (But it is pointing to your website), then it will forward the request to the controller's action (StatusCode/Index action, in this example) that you have defined in the middleware.</p>
+
+                <div><img src="~/images/Web/Back/projectStructure/unknownrequest.png" alt="unkownrequest" class="img-responsive center-block" /></div>
+
+                <p>Noticed that the unknown request will still get a nice view and will be able to navigate through out your application using the layout page. The good thing here is that you don't get a fully blank page saying <i>HTTP 500 Internal Server error</i>, instead you get a nice message from the application with the layout page in the response. These Middlewares sit on the HTTP request pipeline.</p>
+
+                <blockquote>
+                    The middleware that serve these unknown requests in ASP.NET Core is <i>"UseStatusCodePagesWithReExecute()" extension method.</i>
+                </blockquote>
+
+                <div><img src="~/images/Web/Back/projectStructure/client-owin-web.png" alt="unkownrequest" class="img-responsive center-block" /></div>
+
+                <p>This is the most basic example of a middleware. In ASP.NET Core, some middlewares are large such as MVC middleware and some are small such as shown above. We can create our own custom middleware. I'll blog about how to create your own custom middleware later.</p>
+
+                <p>Another most common use of Startup.cs class is to use as a DI Container for your whole application. If you don't know what DI pattern is? Below is the link of blog post that will help you understand Dependency Injection Pattern in ASP.NET Core.</p>
+                <div class="text-center">
+                    <a asp-action="DI" asp-controller="Web" class="btn btn-default font-light-text">Dependency Injection in ASP.NET Core</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>

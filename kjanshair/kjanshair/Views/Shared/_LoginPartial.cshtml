@@ -1,0 +1,36 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using kjanshair.Models
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <form asp-controller="Account" asp-action="LogOut" method="post">
+        <ul class="nav navbar-nav navbar-right">
+            <li>
+                <a asp-action="Index" asp-controller="Blog">Blogs</a>
+            </li>
+            <li class="hidden-xs">
+                <a style="font-size: larger; pointer-events: none"><strong>I</strong></a>
+            </li>
+            <li>
+                <a style="pointer-events: none">Signed In as <strong>Administrator</strong></a>
+            </li>
+            <li>
+                <input type="submit" class="btn btn-link sign-out" value="Sign-out" />
+            </li>
+        </ul>
+    </form>
+}
+else
+{
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            <a asp-action="Contact" asp-controller="Home">Contact</a>
+        </li>
+        <li>
+            <a asp-action="Index" asp-controller="Blog">Blogs</a>
+        </li>
+    </ul>
+}

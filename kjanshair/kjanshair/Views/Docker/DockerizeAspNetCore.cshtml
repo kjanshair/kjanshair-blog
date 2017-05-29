@@ -1,0 +1,203 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Dockerize ASP.NET Core";
+}
+<header class="intro-header green-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">Dockerize ASP.NET</h1>
+                    <hr class="small">
+                    <span class="subheading">Make a Docker container of your first ASP.NET Core application</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <p>This is the continuation of our <a asp-controller="Blog" asp-action="IntroToDocker" class="underline">previous</a> blog post about Docker Fundamentals. Here, we will learn how to create our own Docker image of a raw ASP.NET Core application by creating a <strong>Dockerfile</strong>, creating a container of a running instance of the application on our local machine and finally how to push this Docker image to <a href="http://hub.docker.com/" class="underline" target="_blank">Docker Hub</a> to share the image with other people.</p>
+                <h2 class="font-light">Sample Application</h2>
+                <p>For this example, I've a simple static ASP.NET Core project although you can setup your own ASP.NET Core application. You can get directly from this repository:</p>
+                <div class="text-center">
+                    <a href="https://github.com/kjanshair/MicrosoftAzureDockerDemo" target="_blank" class="btn btn-primary">
+                        <span class="fa-stack fa-lg">
+                            <i class="fa fa-github fa-stack-2x fa-inverse"></i>
+                        </span> GitHub
+                    </a>
+                </div>
+                <br />
+                <blockquote>
+                    You have to restore Bower and CoreFx packages by typing "bower install" and "dotnet restore" respectively at the root in the terminal after cloning.
+                </blockquote>
+                <p>Just clone this repository and navigate to the root directory.</p>
+                <p>
+                    Start the Docker Engine on your local machine by opening Docker application (It will start Docker Engine automatically for you) and in the terminal, type:
+                </p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+docker info
+</pre>
+                </div>
+                <p>To make sure that Docker is up and running on your system.</p>
+
+                <h2 class="font-light">Creating a Dockerfile</h2>
+                <p>Dockerfile, in Docker, is a file which contains a set of commands that we want to run while creating the Docker image. A Dockerfile is like a recipe file that Docker-Daemon uses to create containers. It is much like a batch file which determines which command or set of commands to run to get the job done. Here, the Dockerfile we are about to create is pretty straightforward. Lets create a new file using a text-editor at the root and name it as <i>Dockerfile</i>. the first command that we add to Dockerfile is:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+FROM microsoft/dotnet:latest
+</pre>
+                </div>
+                <p>This line represents the base image of the Docker image. Each Docker image usually derives from another image. The concept of base image is the same as the base-derive classes in Object-Oriented Paradigm. If you want a complete blank Docker image, you may have to derive from a Linux distribution image available on the Docker Hub such as Ubuntu, CentOS or other. The base image that we are using here contains all the .NET Core runtime components, built by Microsoft, so that we reuse these components rather than manually downloading them while creating our image. So .NET Core CLI will be available for us in our Docker container by deriving it from this base image.</p>
+                <blockquote>
+                    Capital words are Dockerfile keywords.
+                </blockquote>
+                <p>Next add the following line:</p>
+
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+MAINTAINER [Name] [Email]   # Optional
+</pre>
+                </div>
+                <p>This line shows the author of the Docker image to other people on Docker Registry (Docker Hub). This line is optional.</p>
+
+                <p>Next add:</p>
+
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+COPY . /app
+
+WORKDIR /app
+</pre>
+                </div>
+                <p>These lines are used to copy current working directory of application to "app" folder using the <i>COPY</i> command and set the working directory as "app" directory using <i>WORKDIR</i> command. Pretty simple!</p>
+                <p>Next, add:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+RUN ["dotnet", "restore"]
+
+RUN ["dotnet", "build"]
+</pre>
+                </div>
+                <p>These commands will restore all of our CoreFx packages that our application uses, while creating the image and build the application to generate runtime assemblies. Next, we will expose a port from within the container to external world (To the Host-Machine) by adding:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+EXPOSE 5000
+</pre>
+                </div>
+                <p>And finally, we will define an entry point of our application as <strong>dotnet</strong> command and application's default URL by adding:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+ENTRYPOINT ["dotnet", "run", "--server.urls", "http://0.0.0.0:5000"]
+</pre>
+                </div>
+                <p>The final Dockerfile is given below:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+# This is the base image which determines from which Docker image the container should derive.
+FROM microsoft/dotnet:latest
+
+# Optional: Type the author of this Docker image
+MAINTAINER Your_Name &ltYour_Email&gt
+
+# Copy the files and folders from current directory to "app" directory
+COPY . /app
+
+# Set the working directory as "app" directory
+WORKDIR /app
+
+# Run the following commands in Linux Terminal to restore .NET Core packages
+RUN ["dotnet", "restore"]
+
+# Build the application
+RUN ["dotnet", "build"]
+
+# Expose a port number from the container to outside world
+EXPOSE 5000
+
+# Determine an entry point of the application.
+ENTRYPOINT ["dotnet", "run", "--server.urls", "http://0.0.0.0:5000"]
+</pre>
+                </div>
+                <br />
+                <blockquote>
+                    The default generated templates for ASP.NET Core either by using Yeoman or using .NET Core CLI as "dotnet new -t web" command already contains this Dockerfile.
+                </blockquote>
+                <h2 class="font-light">Creating a Docker image</h2>
+                <p>Now open-up the terminal right at the root and type the following command syntax as:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+docker build -t [image name] [directory] 
+</pre>
+                </div>
+                <p>Replace [image name] with your image name and [directory] as current working directory by typing ".". I'm going to use as <i>aspnetcore-docker</i> name. </p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+docker build -t aspnetcore-docker . 
+</pre>
+                </div>
+                <p>Then hit enter and you will see that Docker has started creating the image and restoring CoreFx packages.</p>
+                <p>
+                    After a while, you will see that Docker has successfully created Docker image of your application on your local development machine. You can see the newly created image in the list of Docker images on our local machine by typing in the terminal:
+                </p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+docker images
+</pre>
+                </div>
+                <p>We run our Docker container by typing in the terminal as:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+docker run -p 80:5000 aspnetcore-docker
+</pre>
+                </div>
+                <p>This command says that: Run the container based upon this image (aspnetcore-docker) and expose port 5000 from the container to the port 80 (default port) in the Host-Machine. Now open-up the browser and don't navigate to your local host, instead navigate to <i>http://Docker</i>.</p>
+                <p>You will see in the terminal that Docker-Engine has started the container:</p>
+                <p>And you can see the application up and running in the browser:</p>
+                <div class="center-block">
+                    <img src="~/images/Docker/DockerizeAspNetCore/docker-powershell-3.png" alt="docker-powershell-1" class="img-responsive" />
+                </div>
+                <h2 class="font-light">Push to Docker Hub</h2>
+                <p>Now its time to push our newly created Docker image to <a href="http://hub.docker.com/" class="underline" target="_blank">Docker Hub</a>. As said earlier, Docker Hub is the default Docker Registry where we push, pull and share our Docker image as repositories. It is the same as <a href="https://github.com">GitHub</a> for Git repositories.</p>
+                <p>The first thing we need to do is to login to our Docker account on our local development machine by typing:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+docker login
+</pre>
+                </div>
+                <p>It will prompt the user name and password for our Docker Hub account, enter it and it will display a success message like:</p>
+                <div class="center-block">
+                    <img src="~/images/Docker/DockerizeAspNetCore/docker-powershell-4.png" alt="docker-powershell-1" class="img-responsive" />
+                </div>
+                <p>After log in, your have to tag your image to your Docker Hub image namespace. Usually your account name is your name of the namespace. Type in the terminal as:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+docker tag IMAGE [:TAG] [REGISTRYHOST /] [USERNAME /] NAME [:TAG]
+</pre>
+                </div>
+                <p>In this command syntax, replace image your image name that you've just created, REGISTRY_HOST with your Docker Hub account name and tag with the version label or a tag such as <i>latest</i>. After pressing enter, it will tag your image to your Docker Hub namespace and finally push your Docker image to the Docker Hub by typing in the terminal as:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+docker push NAME [:TAG]  #(aspnetcore-docker:latest)
+</pre>
+                </div>
+                <p>Hit enter and you'll see that commands have started executing and finally your Docker image will be available on your Docker Hub account.</p>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+        <hr />
+    </div>
+</article>

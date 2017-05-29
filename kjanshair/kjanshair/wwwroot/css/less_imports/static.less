@@ -1,0 +1,48 @@
+﻿@import "variables.less";
+
+a {
+    text-decoration: none !important;
+}
+
+strong {
+    font-weight: 600;
+}
+
+a > img:hover {
+    cursor: pointer;
+}
+
+a.underline {
+    text-decoration: underline !important;
+    color: black;
+}
+
+.globalFontFamily {
+    font-family: @fontfamily;
+}
+
+image:hover {
+    cursor: pointer;
+}
+
+.font-light {
+    .globalFontFamily;
+    font-weight: @fontweight;
+}
+
+.font-light-text {
+    .globalFontFamily;
+    font-weight: 500;
+}
+
+p {
+    .globalFontFamily !important;
+    font-weight: @fontweight;
+    font-size: @defaultFontSize;
+}
+
+p.labels {
+    .globalFontFamily;
+    font-size: 14px !important;
+}
+

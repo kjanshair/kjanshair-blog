@@ -1,0 +1,64 @@
+﻿@{
+    ViewBag.Title = "Home";
+}
+
+<header class="intro-header blue-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <div class="page-heading">
+                    <h1 class="font-light option animated flipInX">Janshair Khan</h1>
+                    <hr class="small">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10">
+                        <span class="subheading option animated fadeIn">
+                            A Cloud, DevOps, Containerization, Operational and CI\CD guy.
+                        </span>
+                    </div>
+                    <div class="hidden-sm hidden-xs"></div>
+                    <div class="col-md-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+<div class="container" ng-controller="AppController">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-1"></div>
+            <div class="col-md-10">
+<div class="alert alert-info font-light" role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button> <strong>Important!</strong> Future blog posts will be posted at <a href="http://blog.kjanshair.com" class="underline">http://blog.kjanshair.com</a></div>
+                <div class="control-group">
+                    <div class="font-light form-group floating-label-form-group controls">
+                        <input type="text" ng-model="search" class="form-control" placeholder="Find">
+                        <p class="help-block labels text-danger"></p>
+                        <span class="text-danger"></span>
+                    </div>
+                </div>
+                <br />
+                <div ng-repeat="post in posts | orderBy: '-lastupdated' | filter:search">
+                    <div class="link-component font-light-text" ng-click="clicked(post.url)">
+                        <h4 class="font-light-text">
+                            <span>{{post.title}}</span>
+                            <i class="{{post.icon}}"></i><span class="font-light hidden-xs hidden-sm pull-right"><i>{{post.span}}</i> {{post.date | date}}</span>
+                        </h4>
+                    </div>
+                </div>
+                <div class="col-md-1"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <environment names="Development">
+        <script src="~/lib/angular/angular.js"></script>
+        <script src="~/js/app.js"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+        <script src="~/js/app.min.js"></script>
+    </environment>
+}

@@ -1,0 +1,322 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Entity Framework Core";
+}
+
+<header class="intro-header blue-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">Entity Framework</h1>
+                    <hr class="small">
+                    <span class="subheading font-light">Getting Started with Entity Framework Core 1.0 (PostgreSQL)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <h2 class="font-light">What is an ORM (Object Relational Mapper)?</h2>
+                <p>
+                    An ORM is a framework which <i>maps object entities (such as properties and classes) of an application</i> to <i>relational entities (such as tables and columns)</i> of a database.
+                    We write our code in our preferred programming language and we can manage the application database schema right from the code. There are several ORM(s) exists such as Dapper, NHibernate and Microsoft Entity Framework.
+                </p>
+                <p>
+                    Here we will take a very basic look at Microsoft Entity Framework Core 1.0 (EFCore 1.0) using PostgreSQL provider with a C# Console App but you also can use it in a UWP or in ASP.NET Core. EFCore is also built from ground-up like .NET Core. It provides a faster and better data access API(s) than Entity Framework Core 6.x. EF Core
+                    is completely open-source and cross-platform ORM. It supports a number of database providers such as PostgreSQL, SQL Server, IBM Data Servers and more. Some of the providers are in progress including non-relational providers such as NoSQL, Redis, Azure Table Storage (some of the providers will be added soon) etc.
+                    You can find the available and upcoming providers at official EFCore documentation site <a href="https://docs.efproject.net/en/latest/providers/index.html" class="underline" target="_blank">here</a>.
+                </p>
+                <h2 class="font-light">Using Entity Framework Core in a Console App</h2>
+                <p>We can use EFCore in an application with 2 different ways, <strong>Code First Approach</strong> and <strong>Database First Approach</strong>. Let's see both with an example.</p>
+                <h3 class="font-light-text">Code First:</h3>
+                <p>
+                    Code first approach is used if you want to create and manage the database from your application code. You can create the database, if not exists already, at runtime or using Migrations.
+                </p>
+                <p>
+                    To see Code First Approach in action, create a C# Console App and add the following packages in <i>project.json</i> file as dependencies:
+                </p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+    "Microsoft.EntityFrameworkCore": "1.0.0",
+    "Microsoft.EntityFrameworkCore.Design": "1.0.0-preview2-final",
+    "Microsoft.EntityFrameworkCore.Tools": "1.0.0-preview2-final",
+    "Npgsql.EntityFrameworkCore.PostgreSQL": "1.0.0",
+    "Npgsql.EntityFrameworkCore.PostgreSQL.Design": "1.0.0"
+</pre>
+                </div>
+                <p></p>
+                <blockquote>
+                    Make sure you pull the latest versions.
+                </blockquote>
+                <p>And modify the <i>tools</i> section in <i>project.json</i> as:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+  "tools": {
+    "Microsoft.EntityFrameworkCore.Tools": "1.0.0-preview2-final"
+  }
+</pre>
+                </div>
+                <p>Next, create any Entity in the code with some properties, for this example, create <i>Account.cs</i> as:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">Account.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    public class Account
+    {
+        public int AccountId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    And create a Context class. A context class is representation of your database in the form of a C# class. Generic properties of <i>DbSet<></i> represents the tables and
+                    the properties of that entity represents the individual columns in that entity. For simplicity, just add the following context class and derive it from the <i>DbContext</i> class which tells the EFCore that it is a context class as:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">ApplicationContext.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    public class ApplicationContext : DbContext
+    {
+        //The Accounts will be the name of the table 
+        public DbSet&ltAccount&gt Accounts { get; set; }
+
+        //Use this method, if you want to change the properties such as custom table names and others while creating the model.
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>Next, we have to tell this context class that which database to connect to. To do this, we override the <i>OnConfiguring()</i> method in our context class, specify the provider (PostgreSQL in our example) and specify the connection string as:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">ApplicationContext.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    public class ApplicationContext : DbContext
+    {
+        //The Accounts will be the name of the table 
+        public DbSet&ltAccount&gt Accounts { get; set; }
+
+        //Use this method, if you want to change the properties such as custom table names and others.
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
+
+        //This method will be used to configure the database properties such as Provider, Connection String(s) and more.
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseNpgsql("{ConnectionString}");
+            base.OnConfiguring(optionsBuilder);
+        }
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    Here we are using the <i>Ngpsql()</i> which is the PostgreSQL provider in EFCore and we pass in it the connection string of the database. Now our context class is ready. The next thing is to create the database. With Code First Approach, the database will be created for you at runtime if not exists already (We have to tell EFCore explicitly for this). There are 2 ways to create the database.
+                </p>
+                <p>
+                    <strong>One way</strong> is to use <i>Database.EnsuredCreated()</i> method in the constructor of the context class. This will create your database first at runtime (if not exist) and then any pending operation will be performed.
+                </p>
+                <p>
+                    The <strong>Second Way</strong> is to use <i>Entity Framework Migrations</i>. Migrations are the most common and recommended way to use in production applications. You add your migrations using .NET Core CLI, it will capture the current snapshot of your model (application context)
+                    and after updating, it will create or update your database based upon your model. The migration history is stored in a separate "Migration" folder in application and in a separate table in the database created by EFCore. For this example, we will use the first one for the sake of simplicity.
+                </p>
+                <p>Next, create a parameterless constructor in the context class and add the <i>Database.EnsureCreated()</i> method as:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">ApplicationContext.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    public class ApplicationContext : DbContext
+    {
+        public ApplicationContext()
+        {
+            Database.EnsureCreated();   // Create the database
+        }
+
+        // The Accounts will be the name of the table 
+        public DbSet&ltAccount&gt Accounts { get; set; }
+
+        // Use this method, if you want to change the properties such as custom table names and others.
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
+
+        // This method will be used to configure the database properties such as Connection String(s) and more.
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseNpgsql("{ConnectionString}");
+            base.OnConfiguring(optionsBuilder);
+        }
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>Finally add some data in <i>Accounts</i> collection in the <i>Main()</i> method:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">Program.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            using (ApplicationContext context = new ApplicationContext())
+            {
+                context.Accounts.Add(new Account { FirstName = "Janshair",
+                                                   LastName = "Khan",
+                                                   Email = "kjanshair@kjanshair.com",
+                                                   Password = "p@ssw0rD" });
+                context.SaveChanges();
+            }
+        }
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>And run the application. Now we see that our application has successfully created the database and inserted the data. You can see it in pgAdmin or psql client.</p>
+                <h3 class="font-light-text">Database first (Reversed-Engineering):</h3>
+                <p>
+                    Database first approach is also supported in EFCore where we first create our database or use any existing one and then we reversed engineer it in our application so that we can perform database operations right from our code
+                    the same way we do in <i>Code First</i> approach. So we first create our Postgres database and use .NET Core CLI to scaffold the database in our Console Application. 
+                </p>
+                <p>
+                    Now create a very basic database with any name and create a table with some columns
+                    (I'll use "ApplicationDb" with a table "Account") manually in pgAdmin tool (if you are on Windows) or execute the following SQL Script one by one in <strong>psql</strong> client:
+                </p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+CREATE DATABASE ApplicationDb;
+
+CREATE TABLE Account (
+  Id SERIAL PRIMARY KEY,
+  FirstName TEXT NOT NULL,
+  LastName TEXT NOT NULL,
+  Email TEXT NOT NULL UNIQUE,
+  Password TEXT NOT NULL
+);
+</pre>
+                </div>
+                <p>Now our Postgres database is ready. Next open-up the terminal right at the root of the project and start scaffolding the database with .NET Core CLI. For scaffolding, we use a command which takes 2 arguments as by syntax:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+dotnet ef dbcontext scaffold "{YourConnectionString}" providerName
+</pre>
+                </div>
+                <p>
+                    In our case, we are using PostgreSQL. Entity Framework Postgres provider is <i>Npgsql.EntityFrameworkCore.PostgreSQL</i>. So in our case, we would type something like this:
+                </p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+dotnet ef dbcontext scaffold "{YourConnectionString}" Npgsql.EntityFrameworkCore.PostgreSQL -o Models
+</pre>
+                </div>
+                <p></p>
+                <blockquote>
+                    Where <strong>-o</strong> parameter is used to specify the directory where the context classes will be output (In Models folder, in this case).
+                </blockquote>
+                <p>Run the command and you will see that your database schema is now available in "Models" folder with a context class and an "Account" entity.</p>
+                <p>Now you can CRUD entities in your Postgres database using your context class like:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">Program.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            using (applicationdbContext context = new applicationdbContext())
+            {
+                context.Account.Add(new Account { Firstname = "Janshair",
+                                                  Lastname = "Khan",
+                                                  Email = "kjanshair@kjanshair.com",
+                                                  Password = "p@ssw0rD" });
+                context.SaveChanges();
+            }
+        }
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>And you will see the entities are being added successfully in the database.</p>
+                <blockquote>
+                    You might be wondering that where is the 3rd approach, Model First Approach, that we have been using in EF 6.x.
+                    Model First Approach is not yet available in .NET Core because we don't have any visual designer that we have had in Visual Studio.
+                    So the current version of EFCore only supports these 2 approaches.
+                </blockquote>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>

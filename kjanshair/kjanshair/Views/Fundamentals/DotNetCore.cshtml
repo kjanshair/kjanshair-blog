@@ -1,0 +1,90 @@
+﻿@{
+    ViewBag.Title = ".NET Core";
+}
+
+<header class="intro-header red-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">Introducing .NET Core</h1>
+                    <hr class="small">
+                    <span class="subheading font-light">An open source and cross-platform edition of .NET</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <h2 class="font-light">What is .NET Core?</h2>
+                <p>
+                    .NET Core is a new and entirely rebuilt version of the .NET Framework ecosystem. It is developed with a couple of things in mind that is it will be <strong>Open Source</strong>, <strong>Cross-Platform</strong>, <strong>Fast</strong>, <strong>Light-Weight\Modular</strong> and <strong>Cloud Optimize</strong>.
+                </p>
+                <p>
+                    .NET Core is not the same as the full .NET Framework that we know already and comes with Windows rather think of it as rebuilt, optimize and cross-platform version of .NET Framework. It has the same JIT, MSIL, GC, CLR and other components as that of .NET Framework. The CLR component that gets installed with .NET Core is known as <strong>CoreCLR</strong> and the libraries (FCL or BCL in the .NET Framework) are added via NuGet and are known as <strong>CoreFx</strong>.
+                </p>
+                <p>
+                    While developing applications with .NET Framework, we usually are tightly coupled with Visual Studio and Windows. In Windows, the OS hosts the Framework CLR and make our application work against CLR so that all the unused resources get released and unused objects get erased upon getting free behind the scene for us.
+                </p>
+                <p>The same experience applies to .NET Core. It comes with a tiny CoreCLR which works the same as .NET Framework CLR. .NET Core comes with CLIs (Command-Line Interface) which we use for running, publishing, booting up the .NET Core application against and CoreCLR. This is not done by the Host OS as we have been doing with .NET Framework.</p>
+                <p>
+                    Now a question raises in mind that with the release of .NET Core for cross-platform .NET development, can we run all of our .NET Framework applications such as Windows Form, WPF, WCF and more against .NET Core on any other platform?
+                    The answer is <i>Not Yet!</i>, the .NET Team started with ASP.NET (and C# Console Apps) for running their first products on the top of .NET Core. You can also run UWP (Universal Windows Platforms) apps on the top of .NET Core ecosystem but only on Windows. This is why you see only ASP.NET Core and UWP with .NET Core in the image given below. We can also use ASP.NET Core with .NET Framework.
+                </p>
+                <div>
+                    <img src="~/images/Fundamentals/netcore.png" class="img-responsive center-block" alt=".NET Core" />
+                </div>
+                <p>
+                    All the .NET Framework APIs are not yet available for .NET Core. This is where Microsoft introduced <strong>.NET Standard</strong> a unified set of libraries for all run-times. You can learn more about .NET Standard at Immo Landweth's official YouTube channel from <a href="https://www.youtube.com/watch?v=YI4MurjfMn8&list=PLRAdsfhKI4OWx321A_pr-7HhRNk7wOLLY" class="underline" target="_blank">here</a>.
+                </p>
+                <p>Now lets see how you can create and run your first C# Console Application on the top of .NET Core.</p>
+                <blockquote>
+                    I assume you have installed .NET Core on your system. If you don't know how to install .NET Core, I wrote a post <a asp-controller="Blog" asp-action="AspNetCoreSystem" class="underline" target="_blank">here</a> where you can learn what and why certain stuffs are required for your machine to run .NET Core and ASP.NET Core applications.
+                </blockquote>
+                <hr />
+                <h2 class="font-light">Creating a C# Console App with .NET Core</h2>
+                <p>Creating a simple C# .NET Core Console app is pretty straight forward. You just need to perform the following steps:</p>
+                <ul class="list-group font-light">
+                    <li class="list-group-item">1. Initialize the code</li>
+                    <li class="list-group-item">2. Restore CoreFx packages</li>
+                    <li class="list-group-item">3. Run the application</li>
+                </ul>
+                <p>To do this, create an empty folder anywhere, open-up the terminal there and type:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+dotnet new
+</pre>
+                </div>
+                <p>This will create <i>Program.cs</i> (A C# class where program's entry point is defined) and <i>project.json</i> (package.json file is used to manage NuGet packages dependencies) files. Next type:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+dotnet restore
+</pre>
+                </div>
+                <p>This will restore the CoreFx packages from the NuGet library and then finally type the following command in the terminal to run the application:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+dotnet run
+</pre>
+                </div>
+                <p>This will build and run the application with a "Hello World!" message in the terminal.</p>
+                <p>You can create a smallest ASP.NET Core MVC application from this Console App, click the link given below to see how to create a most basic ASP.NET Core MVC application.</p>
+                <div class="text-center">
+                    <a asp-controller="Fundamentals" asp-action="SmallAspNetCoreApp" class="btn btn-default font-light-text">Creating a smallest ASP.NET Core application</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>

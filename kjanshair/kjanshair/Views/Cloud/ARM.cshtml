@@ -1,0 +1,193 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Azure Resource Manager";
+}
+
+<header class="intro-header red-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">Azure Resource Manager</h1>
+                    <hr class="small">
+                    <span class="subheading font-light">A new and modern way of managing resources with Microsoft Azure</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <h2 class="font-light">Resource management on Azure</h2>
+                <p>
+                    In Microsoft Azure, we used to create a huge amount of resources to suite our business such as VMs,
+                    Web Apps, Azure SQL databases, Load Balancers and Virtual Networks. Creating and managing these individual resources
+                    always have been a challenge for businesses. In 2015, Microsoft introduced a new way of creating and managing these individual resources
+                    differently and more efficiently than the previous one called <strong>Azure Resource Manager</strong>.
+                </p>
+                <p>
+                    As we know that Microsoft Azure supports 2 portals to create and manage resources in Azure Data Centers:
+                </p>
+                <ul class="font-light">
+                    <li><strong>Classic Portal</strong> (https://manage.windowsazure.com)</li>
+                    <li><strong>Preview Portal</strong> (https://portal.azure.com)</li>
+                </ul>
+                <p>
+                    Creating and Managing resources in these 2 portals are different (Although we can use the classical way of managing resources with Preview Portal).
+                    Now let's take a business case where we have 2 VMs, a Virtual Network, a Load-Balancer and a storage account and see how our business case fits into these 2 Azure Portals.
+                </p>
+                <h2 class="font-light">Azure Service Management (the classical way)</h2>
+                <p>
+                    If you have gone through the Azure experience using the classical portal before, you see a whole set of resources together categorized by
+                    the left navigation menu.
+                </p>
+                <div>
+                    <img src="~/images/Cloud/arm/arm01.png" class="img-responsive center-block" alt="arm01" />
+                </div>
+                <p>
+                    Using our business case with this ASM Portal, we get the following drawbacks:
+                </p>
+                <ul class="list-group font-light">
+                    <li class="list-group-item">We don't have a way to group and manage our business application's infrastructure individually</li>
+                    <li class="list-group-item">We get a long list of resources where we need to find and configure the required resource. Each resource in Classical Portal is singleton</li>
+                    <li class="list-group-item">We have to determined and take care of dependencies such as a storage account must be configured before a VM is provisioned</li>
+                    <li class="list-group-item">There is no way where we can calculate billings for a our business application</li>
+                    <li class="list-group-item">
+                        There is no way to recreate the same infrastructure at once. It means if we need to replicate the same infrastructure or we need some change, we must
+                        go through the entire process again such as creating non-dependent resources first and then provisioning VMs etc.
+                    </li>
+                </ul>
+                <p>
+                    When managing resources with Classical Azure Portal through a terminal either PowerShell or Azure CLI, we are using <strong>Azure Service Management APIs</strong>
+                    where we manage each resource individually with shell commands. 
+                </p>
+                <p>To address these limitations, we make use of the new <strong>Azure Resource Manager</strong>.</p>
+                <h2 class="font-light">Azure Resource Manager (ARM)</h2>
+                <p>
+                    With Azure Portal, Microsoft introduced <strong>Azure Resource Manager (ARM)</strong> which is a modern, cheaper and a faster way to deploy and configure resources on Azure.
+                    <i>ARM is only available in Azure Preview Portal</i> but you can use the classical ASM model in the Preview Portal as well.
+                </p>
+                <p>
+                    ARM addresses those limitations that exist in ASM. When working with ARM through a terminal such as PowerShell or Azure CLI, we make use of ARM API calls
+                    as we will see in a bit. Followings are some of the core features of ARM:
+                </p>
+                <h3 class="font-light"><img src="~/images/Cloud/arm/arm02.png" /> Resource Groups</h3>
+                <p>
+                    With Azure Resource Manager, you can now create groups of related Azure resource called <strong>Resource Groups</strong>. With Resource Groups, you can group
+                    related resources separately from the rest of the Azure resources. This makes managing and monitoring resources much easier.
+                </p>
+                <h3 class="font-light"><img src="~/images/Cloud/arm/arm03.png" /> Declaratively Managing Resources</h3>
+                <p>
+                    With ARM, you can now implement resources with a term called <strong>Infrastructure as Code</strong>. This means you can now write a JSON file where you declaratively write your Azure resources
+                    with their dependencies so that ARM provisions them before the dependent resources are provision. This helps teams like DevOps work better and help them setting up development, staging
+                    and production environments using code. This approach also helps you to redefined your infrastructure if it does not suite your needs. These JSON files are called
+                    <strong>Azure Resource Manager (ARM) Templates</strong>.
+                </p>
+                <h3 class="font-light"><img src="~/images/Cloud/arm/arm04.png" /> Faster Resource Provisioning</h3>
+                <p>
+                    Now with ARM, you don't have to wait for a resource to get provisioned and then you create another. Instead, you can create resources in parallel. If the resources that you want to provisioned
+                    are dependent, you configure dependencies in <strong>ARM Templates</strong> and ARM will spin up non-dependent resources before the dependent resources. This is a faster way of deploying resources.
+                </p>
+                <h3 class="font-light"><img src="~/images/Cloud/arm/arm05.png" /> Costs</h3>
+                <p>Using ARM, you can now calculate costs for a particular set of Azure resources. You can calculate the price of each resource group individually and separately.</p>
+                <h3 class="font-light"><img src="~/images/Cloud/arm/arm06.png" /> Role-Based Access Control (RBAC)</h3>
+                <p>
+                    Before ARM, if you want a user to access their particular business application's infrastructure, you have to provide him the entire control of your subscription or you have to make him an co-administrator.
+                    With this approach, the user has full control over your Azure subscription not only to those resources that are necessary to him.
+                    Now with ARM, you can use <strong>Role-Based Access Control (RBAC)</strong> to restrict access to users only to their Azure resources. Using RBAC, you can grant only the amount of access that a particular set of users need to get their job done so that when they logged in to your Azure subscription they will only see those resources which are related to
+                    them. You can even assign RBAC permissions to individual resources if you want.
+                </p>
+                <p>Now we have seen some of the core benefits of using Azure Resource Manager. Let's see ARM in action with a simplest example.</p>
+                <h2 class="font-light">ARM Templates</h2>
+                <p>
+                    As described earlier that you can create a JSON file known as <strong>ARM Template</strong> and pass this file to ARM and ARM will provision the required resources with their dependencies (if there is any) for you. This is usually called <strong>Infrastructure as Code</strong> approach in the DevOps world.
+                    There are dozens of pre-built ARM QuickStart templates that you can find <a href="https://azure.microsoft.com/en-us/documentation/templates/" class="underline" target="_blank">here</a> or you can create your own one to suite your business case. To help you create your own ARM Templates, You can use Visual Studio with Azure SDK installed if you are on Windows.
+                    Visual Studio provides great capabilities for creating ARM templates which you can find the <i>Cloud</i> project category as:
+                </p>
+                <div>
+                    <img src="~/images/Cloud/arm/arm07.png" class="img-responsive center-block" alt="arm01" />
+                </div>
+                <p>
+                    With Intellisense, code block selections, dialogs for creating ARM Templates. If you are on Windows, Visual Studio is the recommended tool for creating your own ARM templates.
+                    If you are on a non-Windows environment, you can <a href="http://code.visualstudio.com/" class="underline" target="_blank">Visual Studio Code</a> which is a free and cross platform code editor from Microsoft.
+                    Download and install VS Code and install <strong><i>Azure Resource Manager Tools</i></strong> editor extension from Microsoft. This will help you to build your own ARM templates by enabling
+                    Intellisense, Errors, Warnings etc in VS Code.
+                </p>
+                <p>
+                    To keep things simple, I won't explain here each and every bit of an ARM template syntax. Instead, I'll use a pre-built QuickStart ARM template that will create a simple Web App with a SQL Database in a Resource Group
+                    using <i>Docker Azure-CLI</i> to avoid tooling installations but you can also use other shells like Microsoft Azure PowerShell and NPM Azure CLI.
+                </p>
+                <blockquote>
+                    If you are on a Mac or Linux, you can install Azure-CLI NPM tool or the installer for managing resources on Azure. <a href="https://azure.microsoft.com/en-us/documentation/articles/xplat-cli-install/" class="underline" target="_blank">Click Here</a> to get more information about installing Azure-CLI.
+                </blockquote>
+                <blockquote>
+                    If you are unfamiliar with Docker, <a asp-controller="Docker" asp-action="IntroToDocker" class="underline">Click Here</a> to take a basic look.
+                </blockquote>
+                <p>
+                    So we will pull down the latest <i>microsoft/azure-cli</i> Docker Image from the Docker Hub and interact with it using the command:
+                </p>
+                <pre>
+docker run -it microsoft/azure-cli
+</pre>
+                <p>Inside the container, login to you Azure subscription by typing:</p>
+                <pre>
+azure login
+</pre>
+                <p>After walking through the login and subscription selection process, change the deployment configuration to ARM by typing:</p>
+                <pre>
+azure config mode arm
+</pre>
+                <p>Now you need to create a <strong>Resource Group</strong>. Recall that a Resource Group is a logical grouping of your Azure services. To create a Resource Group, we need a name and a Geo-location. Type any name with the location that suite your needs. For this example, I'll use:</p>
+                <pre>
+azure group create -n "MyResourceGroup" -l "East Asia"
+</pre>
+                <p>Execute this command and you can see that a Resource Group with the name <i>MyResourceGroup</i> has been created for you in the Portal.</p>
+                <p>
+                    We will use <a href="https://azure.microsoft.com/en-us/documentation/templates/201-web-app-sql-database/" target="_blank" class="underline">this</a> pre-built ARM template available at <a href="https://azure.microsoft.com/en-us/documentation/templates/" class="underline" target="_blank">Azure QuickStart Templates</a>
+                    for simplicity. So we need to tell ARM using Azure-CLI that we need a Web App with a SQL Database based upon this template. So to get up and running, we use the raw version of the template from <a href="https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-web-app-sql-database/azuredeploy.json" class="underline" target="_blank">GitHub</a>
+                    and define the Resource Group (that we just created) in the Azure-CLI as:
+                </p>
+                <pre>
+azure group deployment create --template-uri https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-web-app-sql-database/azuredeploy.json -g "MyResourceGroup"
+</pre>
+                <p>After executing, you will see that the Azure-CLI has started provisioning Azure Resources for you. After a very short time, you will see an empty Web App connected with a SQL Database up and running in the Azure Portal.</p>
+                <p>
+                    Notice that how quickly you setup your Azure Services with required configurations by typing just a single command. Provisioning and configuring these resources manually yourself is tedious. The same way, businesses can author their own ARM templates the way they want their infrastructure to be.
+                    Provisioning resources with ARM is much faster.
+                </p>
+                <p>Typically a DevOps team works with ARM using a source control like: </p>
+                <div>
+                    <img src="~/images/Cloud/arm/arm08.png" class="img-responsive center-block" alt="arm08" />
+                </div>
+                <p>
+                    The developers write the ARM templates, the operational team tests and verifies the infrastructure and finally the DevOps team push it to the Source Control where ARM gets the template and update the Azure Resource accordingly.
+                </p>
+                <blockquote>
+                    This is just a typical ARM DevOps work-flow. It can also includes several other steps like running Unit and Integration Tests etc.
+                </blockquote>
+                <p>
+                    If you have an existing Azure Resource Group, you can export your ARM template from the portal or CLI. From the Preview Portal, you can go to
+                    "<i>Resource Group => Automation Script</i>", there you will see the JSON file of your Resource Group ARM Template. It can help you to re-create those Azure Services quickly.
+                </p>
+                <p>
+                    To explore more about Azure Resource Manager, the best way is the <a href="https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/" class="underline" target="_blank">ARM Website</a>.
+                    From <a href="https://azure.microsoft.com/en-us/documentation/articles/resource-group-authoring-templates/" class="underline" target="_blank">here</a>, you can learn about how to create your own ARM templates that suite your business needs.
+                    <a href="https://azure.microsoft.com/en-us/documentation/articles/role-based-access-control-configure/" class="underline" target="_blank">Here</a> you can find how to use Role-Based Access Control (RBAC) with a Resource Group.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>

@@ -1,0 +1,225 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Azure VMs in a Nutshell";
+}
+
+<header class="intro-header blue-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <img class="center-block img-responsive" src="~/images/Cloud/armvms/armvms-0.png" />
+                    <hr class="small">
+                    <span class="subheading font-light">Azure Virtual Machines in a Nutshell</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <p>
+                    OK, so now I just started to look at Azure Virtual Machines, I touched Azure App Service before which is an easy way for getting started with Azure. But when I come to Azure Virtual Machines!
+                    I came across a number of astonishing things such as Azure Resource Manager, Virtual Networks, NSGs, Disks, Availability Sets and more. What are they and where should I started from?
+                    I don't even know how they are related to each other. I thought, it would be as easy as I log in to my home computer and start doing what
+                    I want to do. Most of things are changed here! Here, I'm gonna try to simplify everything here by looking at a very high-level view of Azure Virtual Machines and its components. Se let's start
+                    from the definition.
+                </p>
+                <h2 class="font-light">What is an Azure Virtual Machine?</h2>
+                <p>
+                    Azure Virtual Machines (or Azure VMs for short) are the central part of Microsoft Azure <i>Infrastructure as a Service</i> (IaaS) compute options. You provision Linux or Windows based virtual machine
+                    in one of the Microsoft Azure data centers and play with it the same way you use your own machine at home or office (an <strong>on-premises machine</strong>).
+                </p>
+                <p>
+                    Before discussing the core components of an Azure VM, let's take a quick overview of deployment models which we can choose to provision different Azure Resources. This is necessary as the provisioning process differs
+                    between the two models.
+                </p>
+                <h2 class="font-light">Azure Virtual Machines Deployment Model</h2>
+                <p>
+                    You can provisioned Azure resources using 2 models available in Azure i.e. either <strong>Classic Model</strong> and <strong>Azure Resource Manager Model</strong>.
+                    Provisioning Azure VMs using Classic Model is a traditional way. Microsoft introduced Azure Resource Manager in 2015 for a better and a faster way for provisioning Azure Workloads.
+                    Microsoft recommends Azure Resource Manager (or ARM) model for your new Azure workloads as the future Azure services will only be available based on this model. I won't go in the details of these 2 models here, however,
+                    I have post <a asp-controller="cloud" asp-action="arm" class="underline" target="_blank">here</a> where you can read more about ARM and how it is more useful than classical model. In this post I'll show you how to
+                    up and running with Azure VMs using Azure Resource Manager deployment model.
+                </p>
+                <p>
+                    The deployment model, shown above, are not limited to just Azure VMs. Any Azure Service that you use are either of these deployment models. OK, let's see the core components of a simplest Azure Virtual Machine.
+                </p>
+                <h2 class="font-light">Azure VM Components</h2>
+                <p>
+                    An Azure VM requires a couple of core components to be ready with it. A stand-alone VM in its simplest form includes a\an:
+                </p>
+                <ul class="font-light">
+                    <li>
+                        <strong><a href="#sa" class="underline">Storage Account</a></strong>
+                    </li>
+                    <li>
+                        <strong><a href="#vnet" class="underline">Virtual Network (VNet)</a></strong>
+                    </li>
+                    <li>
+                        <strong><a href="#nsgs" class="underline">Network Security Group (NSG)</a></strong>
+                    </li>
+                    <li>
+                        <strong><a href="#vms" class="underline">Virtual Machine</a></strong>
+                    </li>
+                </ul>
+                <p>
+                    Now things get change if we have more than one VM for a business needs where we also come across some more Azure services for multiple VMs such as
+                    <strong>Azure Load Balancer</strong>, <strong>Availability Set</strong>, <strong>Azure Scale Sets</strong> and more. I'm going to make things simple for now
+                    by discussing just one VM first and multiple VMs briefly later.
+                </p>
+                <p>
+                    In a Nutshell, when you have a stand-alone on-premises machine, we have a storage part in the form of a Hard-Drive, an NIC for network communication and
+                    the machine itself having a Linux or Windows operating system.
+                </p>
+                <p>
+                    The same things applies to Azure Virtual Machines. When we provision a Virtual Machine, we define the <i>Azure Virtual Network</i> in which the VM resides. Azure Virtual Network
+                    is your own network in the cloud rather than on-premises (unless if you want). A storage option in the form of an <i>Azure Storage Account</i>, a <i>Public IP</i> address for connecting with the VM (usually attached
+                    with VMs NIC card) and a VM having Windows or Linux operating system.
+                </p>
+                <div>
+                    <img src="~/images/Cloud/armvms/armvms-1.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    We usually provision the VM in Azure Portal or CLI and use <strong>SSH</strong> (In case of Linux) or <strong>RDP</strong> (In case of Windows) to connect to the VM through the VM's Public
+                    IP Address. Let's see them individually.
+                </p>
+                <h3 class="font-light" id="sa">Storage Accounts</h3>
+                <p>
+                    An Azure VM stores its data and configurations in Azure Storage Account. As mentioned earlier that when you create a VM, a Storage Account is created
+                    with VM where the VM's data resides (such as Operating System or other data). Azure Virtual Machines have a notion of <strong>Disks</strong>. Disks are the places where a VM's data sits. There are 2 types of Disks:
+                </p>
+                <ul class="font-light">
+                    <li>OS Disks</li>
+                    <li>Data Disks</li>
+                </ul>
+                <p>
+                    As the names suggest, OS disk holds the Operating System and other configurations where as Data Disks hold other data such as third-party softwares etc.
+                    OS disks are usually represented in a Windows VM by <strong>C:\</strong> drive where Windows usually installed and in a Linux VM, it hosts the <strong>/dev/sda1</strong>
+                    partition for root directory.
+                </p>
+                <div>
+                    <img src="~/images/Cloud/armvms/armvms-2.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    OS disks and data disks are stored as <i>Page Blobs</i> storage (In the form of VHDs) in the Azure Storage Accounts. VHDs are supposed to be for intensive I\O operations so they are part of <strong>Azure Premium Storage Account</strong> which
+                    leverages SSD (Solid State Disks) for high performances and low-latency for running I\O operations.
+                    You can mount and unmount disks from your VM as we used to do with local drives in Windows and Linux.
+                </p>
+                <h3 class="font-light" id="vnet">Virtual Networks (VNet)</h3>
+                <p>
+                    Azure Virtual Network (VNet) is your own <i>private</i> network in Azure. VMs and some other Azure services in the same VNet can communicate with each other without a Load Balancer or the Internet.
+                    A VNet consists of a number of components such as <strong>Subnets</strong>, <strong>Azure Load Balancers</strong>, <strong>Network Security Groups (NSGs)</strong>
+                    , <strong>Public IP Address</strong> and others. I won't discuss all of them in details here as we will see it in some later post. I'll only discuss the core components of a VNet required to provision a VM.
+                </p>
+                <p>
+                    A VM in Azure must be placed <strong><i>Inside a Subnet in a VNet</i></strong>. A Subnet is a range or grouping of IP Addresses within where we place our VMs. It is possible to have more than one VM in a Subnet and more than one Subnet in a VNet.
+                    Below is an example of a VNET with one Subnet having 9 VMs.
+                </p>
+                <div>
+                    <img src="~/images/Cloud/armvms/armvms-3.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    An Azure VM has a (optionally) <strong><i>Public IP Address</i></strong> and a <strong><i>Private IP Address</i></strong>. A Public IP Address is used to communicate directory to and from the Internet whereas a Private IP Address is used for services to communicate within the
+                    VNet itself. Public and Private IP Addresses can be declared either <i>Dynamically</i> or <i>Statically</i>. Dynamic IP Addresses are lost when a VM is stopped or deallocated and IP Addresses declared Static are there till the shutdown\deallocation of the VM.
+                </p>
+                <h3 class="font-light" id="nsgs">Network Security Groups (NSGs)</h3>
+                <p>
+                    A Network Security Group (or NSG), in a Nutshell, <i>controls the incoming and outgoing network traffic on a VM</i> using <i>Network Access Control Lists</i>. The network traffic could be from services inside the same VNet or could be from the public Internet. The network traffic rules coming into the VM are known as
+                    <i>Inbound Security Rules</i> and outgoing rules are known as <i>Outbound Security Rules</i>. An NSG can either be attached to a Subnet in a VNet or to individual VM's NIC card. Below is an example of Inbound and Outbound network traffic from a NSG attached to a Subnet.
+                </p>
+                <div>
+                    <img src="~/images/Cloud/armvms/armvms-5.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    NSGs, by default, protect a VM from traffic of any protocol (i.e. HTTP, TCP...) except the <strong>SSH Port 22</strong> in case of Linux VMs and <strong>RDP Port 3389</strong> in case of Windows Server VMs.
+                    You have to manually add Inbound Security Rules for HTTP traffic or any other protocol with a port for your business use case.
+                </p>
+                <h3 class="font-light" id="vms">Virtual Machines</h3>
+                <p>
+                    The component that hosts the Operating System either Linux or Windows is the Virtual Machine itself. This is where you can attached\de-attach VHDs Disks, configure VM's extensions, select VM size and more.
+                </p>
+                <blockquote>
+                    I did not discussed Azure Virtual Machine sizes here which you can read about in details from <a href="https://docs.microsoft.com/en-us/azure/virtual-machines/virtual-machines-windows-sizes" class="underline" target="_blank">here</a>.
+                </blockquote>
+                <p>
+                    Now we have seen all the necessary components of single Azure Resource Manager Virtual Machine. Usually we come across multiple VM's instances and Azure provides tools to deal with multiple VMs.
+                    Let's discuss them a bit.
+                </p>
+                <h2 class="font-light">Multiple Virtual Machines Components</h2>
+                <h3 class="font-light">Availability Sets</h3>
+                <p>
+                    Azure VMs reside on physical servers hosted within Azure's data-centers. Usually
+                    physical devices are subject failed due to any reason. If the physical server goes down, the Azure VM hosted by that physical server also goes down. In that case, the Azure platform will migrate the VM
+                    to a healthy host server to bring the VM back. This healing process could take
+                    several minutes. During that time, the application(s) hosted on that VM will not be available.
+                </p>
+                <p>
+                    To avoids these issues, Microsoft provides <strong>Availability Sets</strong>. Putting two or more VMs into an availability set guarantees that your VMs are spread across multiple racks in the Azure Data Centers, that is, redundant power supply, switches and servers.
+                </p>
+                <h3 class="font-light">Azure Load Balancer</h3>
+                <p>
+                    Usually public facing Internet VMs or within the VNet are exposed through an Azure Load Balancer. In case of Internet, Azure Load Balancer distributes the network traffic evenly across a set of VMs. There are 2 types of Azure Load Balancers, Internal Load Balancer
+                    (for Load Balancing the traffic within the VNet) and External Load Balancer (For Load Balancing the Internet Traffic).
+                </p>
+                <div>
+                    <img src="~/images/Cloud/armvms/armvms-4.png" class="img-responsive center-block" />
+                </div>
+                <p>The above image shows a typical scenario having 2 Load Balancers (Public and Internal). We expose the public IP Address of the Load Balancer to the Internet rather exposing the IP addresses of individual VMs.</p>
+                <h2 class="font-light">Creating a Linux (Ubuntu 16.04) Azure Virtual Machine</h2>
+                <p>
+                    Now let's create a Linux Ubuntu 16.04 LTS Azure VM where we utilize all the core components of Azure required to provision a simple Virtual Machine that we just learn. Login to your Azure Portal and go to
+                    <strong><i>New &gt; Compute &gt; Ubuntu Server 16.04 LTS</i></strong> and click <strong><i>Create</i></strong>:
+                </p>
+                <div>
+                    <img src="~/images/Cloud/armvms/armvms-6.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    In the create blade, type a <i>User Name</i> and select a VM disk type. As said earlier that VHDs are the part of Azure Premium Storage Account which is by default is SSD drive. Provide a <i>Public SSH Key</i> or a <i>Password</i> (with all other components) and click OK.
+                </p>
+                <div>
+                    <img src="~/images/Cloud/armvms/armvms-7.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    Next choose a VM size:
+                </p>
+                <div>
+                    <img src="~/images/Cloud/armvms/armvms-8.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    In the 3rd step, this is where you will configure all the components that I just showed above (i.e. Virtual Network, Public IP, Subnet etc). If you have pre-existing services, you can use them here or create new one.
+                </p>
+                <div>
+                    <img src="~/images/Cloud/armvms/armvms-9.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    Finally click OK and after the summary, Azure will start provisioning the VM for you.
+                </p>
+                <h2 class="font-light">Conclusion</h2>
+                <p>
+                    These components might seem a lot of to you for just creating a Virtual Machine in Azure Resource Manager.
+                    You can either make these components individually or create new one with the VM. Remember the above VM won't allow any incoming or outgoing network traffic
+                    except <strong><i>SSH Port 22</i></strong> (in this case) unless if you don't do manually.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12">
+                        <div class="col-md-12">
+                            <hr />
+                            @await Component.InvokeAsync("Comment")
+                        </div>
+                    </div>
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>
+

@@ -1,0 +1,259 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "View Components";
+}
+
+<header class="intro-header red-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">ViewComponents</h1>
+                    <hr class="small">
+                    <span class="subheading font-light">Building Reusable Web Components in ASP.NET Core</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <p>
+                    ViewComponents are new in ASP.NET Core and used for building reusable web components <i>the same way we used to create <strong>PartialViews</strong> in ASP.NET MVC</i>.
+                    A reusable component can be a comment box in different views, a list employees or it could be anything.
+                    The difference between a <strong>PartialView</strong> and a <strong>ViewComponent</strong> is that a ViewComponent has a code file which makes it more interesting.
+                </p>
+                <p>
+                    ViewComponents are analogous to controller actions and views in MVC i.e. it has code file, a view and modal binding capabilities. To define a ViewComponent, we create a <strong>ViewComponents folder</strong>, define a <strong>ViewComponent</strong> class prefixed by the name of the component
+                    (such as <i>WeatherViewComponent</i>), derive the class from <strong>ViewComponent.cs</strong> and create a View for that ViewComponent in <i>Views</i> folder. These steps are necessary to create a ViewComponent in ASP.NET Core by convention.
+                </p>
+                <p>
+                    Here we will create a simple ViewComponent in the default ASP.NET Core template which will display the current Weather in view wherever we will invoke it.
+                </p>
+                <p>
+                    Create a folder <strong>ViewComponents</strong> at the root of the project, create a class in this folder with the name <strong>WeatherViewComponent.cs</strong>
+                    and derive this class from <strong>ViewComponent.cs</strong> like:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">WeatherViewComponent.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    public class WeatherViewComponent : ViewComponent
+    {
+        
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    This will be the code file of our <i>WeatherViewComponent</i>. Now we define an <i>Invoke()</i> method with <strong>IViewComponentResult</strong> return type. This method will be called whenever we invoke this ViewComponent. 
+                    We want this ViewComponent to take 'country' and 'city' as inputs and display the status of the current weather upon invoking, like:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">WeatherViewComponent.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    public class WeatherViewComponent : ViewComponent
+    {
+        public IViewComponentResult Invoke(string country, string city)
+        {
+            return View();
+        }
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    Now let's create a view for this ViewComponent. Before creating views, we have to take into account that whether a ViewComponent is <i>controller</i> specific or one
+                    that is to be shared across all views.
+                </p>
+                <p>
+                    If the ViewComponent is controller specific, we have to define it in that specific controller's folder and the framework will look for this specific path for finding a view for the ViewComponent:
+                </p>
+                <pre class="folder-structure">
+/Views/{controller}/Components/{component_name}/{name}.cshtml
+
+</pre>
+                <p>If the ViewComponent's view is not found there, it will look for in:</p>
+                <pre class="folder-structure">
+/Views/Shared/Components/{component_name}/{name}.cshtml
+
+</pre>
+                <p>
+                    If it does not find there too, it will throw an exception. We will demonstrate this second approach for simplicity.
+                </p>
+                <p>
+                    Create a <strong>Components</strong> folder in the "<i>Shared</i>" folder in Views and in the "<i>Components</i>" folder, create a sub-folder with the name of the ViewComponent prefix
+                    i.e. ignoring the "ViewComponent" from the ViewComponent class (such as Weather in this case). Like:
+                </p>
+                <pre class="folder-structure">
+Views
+ |__ Shared
+        |__ Components
+                |__ Weather
+        
+</pre>
+                <p>Next create a <strong>Default.cshtml</strong> razor file into this "Weather" folder and write the contents of this file as:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">Default.cshtml</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+@@model string
+
+&lth2&gt Current Weather is @@Model&deg;C &lt;/h2&gt;
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p></p>
+                <blockquote>
+                    If you want to define a different name of your ViewComponent other than Default.cshtml, you have to pass the specified name in the code file of the ViewComponent. "Default" is the one which will 
+                    be invoked by default.
+                </blockquote>
+                <p>
+                    Now we have the view for our <i>WeatherViewComponent</i> ready. Next, we will use <a asp-controller="Web" asp-action="DI" target="_blank" class="underline">Dependency Injection</a> services into this ViewComponent to get weather information that I've written already. So we'll inject the dependencies into
+                    our <i>WeatherViewComponent</i> as:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">WeatherViewComponent.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    public class WeatherViewComponent : ViewComponent
+    {
+        private IWeatherInfo _info;
+
+        public WeatherViewComponent(IWeatherInfo info)
+        {
+            _info = info;
+        }
+
+        public IViewComponentResult Invoke(string country, string city)
+        {
+            string currentWeather = _info.CurrentWeather(country, city);    // DI service for Weather Information
+            return View();
+        }
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>Now we have the Weather Information in <i>currentWeather</i> string. Next, we have to pass this information to the <i>WeatherViewComponent</i>'s View. So modify the line 13 as:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">WeatherViewComponent.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+    public class WeatherViewComponent : ViewComponent
+    {
+        private IWeatherInfo _info;
+
+        public WeatherViewComponent(IWeatherInfo info)
+        {
+            _info = info;
+        }
+
+        public IViewComponentResult Invoke(string country, string city)
+        {
+            string currentWeather = _info.CurrentWeather(country, city);
+            return View&ltstring&gt(currentWeather);
+        }
+    }
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>
+                    As we see at line 13 that we have to specify <i>Model as generic</i> and pass an instance of <i>this model</i> to the view. This is necessary
+                    because we have specified the default name "<i>Default</i>" for our ViewComponent (<i>WeatherViewComponent</i>) and pass it the string model to keep things simple
+                    but you can also pass an instance of a <strong>model class</strong> as we used to do in real world applications.
+                </p>
+                <p>
+                    Now we have the <i>WeatherViewComponent</i> with the <i>Default</i> view. We will <i>invoke</i> this ViewComponent in <strong>About.cshtml</strong> view of the default ASP.NET Core application as:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">About.cshtml</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+@@{
+    ViewData["Title"] = "About";
+}
+
+&lth2&gt@@ViewData["Title"].&lt/h2&gt
+&lth3&gt@@ViewData["Message"]&lt/h3&gt
+
+&ltp&gtUse this area to provide additional  information.&lt/p&gt
+
+&ltp&gt@@await Component.InvokeAsync("Weather", new { country = "Pakistan", city = "Lahore" })&lt/p&gt  &lt!-- Invoke the Weather ViewComponent --&gt
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>You can see that our WeatherViewComponent is rendering successfully!</p>
+                <div>
+                    <img src="~/images/Web/Back/viewcomponent/view-component-1.png" class="img-responsive center-block" alt="view-component-1" />
+                </div>
+                <p></p>
+                <blockquote>
+                    Parameters passing to a ViewComponent should be a Dictionary or Anonymous objects as in this case. This is not applicable on ASP.NET 5 RC1.
+                </blockquote>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>
+

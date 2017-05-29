@@ -1,0 +1,295 @@
+﻿@{
+    ViewBag.Title = "Webpack Hot Module Replacement";
+}
+
+<header class="intro-header green-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <h1 class="font-light">Webpack HMR</h1>
+                    <hr class="small">
+                    <span class="subheading font-light">Setting up Webpack Hot Module Replacement with ASP.NET Core and Typescript in Visual Studio</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <p>
+                    Webpack is the leading <strong>Module Bundler</strong> now a days. The ability to generate and load static assets based upon the needs is what makes Webpack different
+                    from other build system like Gulp and Grunt. Gulp\Grunt work at individual levels whereas Webpack works at a higher level keeping track of your entire project and can be configured extensively
+                    to behave differently in Development and Production Environments.
+                </p>
+                <p>
+                    In this post we will see how do we use Webpack's one of the most excited feature known as <strong>Hot Module Replacement</strong> which is the part of <i>Webpack-dev-middleware</i>. We won't discuss each
+                    ins and outs of Webpack itself as we will see it in detail in a future post. Here we will see how do we use Hot Module Replacement (HMR) in ASP.NET Core with Typescript and
+                    <i>Single-Page Application</i> (SPA) services in ASP.NET Core in its simplest form.
+                </p>
+                <h2 class="font-light">Hot Module Replacement</h2>
+                <p>
+                    <strong>HMR is the ability to load (But not limited to) JavaScript modules in the running application without reloading the entire page</strong>. Pressing refresh each time we
+                    make a change in our code reminds me the time when I used to write my HTML code in Windows Notepad and run it in the browser for testing. The situation becomes even worst when working on
+                    a SPA application with multiple views or in a specific view containing multiple tabs or pagination as we have to navigate thoroughly again and again each time we make a change.
+                </p>
+                <h2 class="font-light">Setting up ASP.NET Core Project in Visual Studio</h2>
+                <p>
+                    Now let's configure an ASP.NET Core MVC application from scratch in Visual Studio so that we can understand each step clearly. So in Visual Studio, go to:
+                </p>
+                <ul class="font-light">
+                    <li>
+                        <strong>New Project => .NET Core => ASP.NET Core Web Application</strong>
+                    </li>
+                    <li>
+                        <strong>Configure DI MVC services and add Controllers and Views with Layouts</strong>
+                    </li>
+                    <li>
+                        <strong>Add "package.json", "tsconfig.json" and "webpack.config.json" files at the root</strong>
+                    </li>
+                    <li>
+                        <strong>Add and install the Webpack and other NPM packages as Dev Dependencies in the "package.json" file</strong>
+                    </li>
+                </ul>
+                <p></p>
+                <h3 class="font-light">Adding necessary NPM packages</h3>
+                <p>
+                    The following NPM packages is the minimum requirement for HMR to work with ASP.NET Core:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">package.json</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+{
+    "devDependencies": {
+       "@@types/node": "6.0.62",
+       "aspnet-webpack": "^1.0.11",
+       "typescript": "^2.1.5",
+       "ts-loader": "^0.8.2",
+       "webpack": "^1.12.14",
+       "webpack-hot-middleware": "^2.10.0"
+    }
+}
+</pre>
+                        </div>
+                    </div>
+
+                </div>
+                <p>
+                    In the above "package.json file", the "typescript" and "webpack" are the standard NPM packages that we need for running Typescript and Webpack. The "ts-loader" package is the
+                    Webpack loader (Think of it as plugin in Gulp\Grunt) for Typescript. The @@types/node contains the type definitions for Node.js and "aspnet-webpack" and "webpack-hot-middleware"
+                    are required by <i>ASP.NET Core SPA Services</i> that we will add next.
+                </p>
+                <h3 class="font-light">Configuring Typescript</h3>
+                <p>Add the following Typescript definition in the "tsconfig.json" file:</p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">tsconfig.json</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "target": "es5"
+  }
+}
+</pre>
+                        </div>
+                    </div>
+
+                </div>
+                <p></p>
+                <h3 class="font-light">Configuring Webpack</h3>
+                <p>
+                    Next, configure Webpack so that it resolves our own custom Typescript file against the <i>"ts-loader"</i> that we just installed as NPM package. So add the following configurations
+                    in the <i>webpack.config.js</i> file as:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">webpack.config.js</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+var path = require('path');
+var webpack = require("webpack");
+
+module.exports = {
+    resolve: { extensions: ['', '.js', '.ts'] },
+
+    entry: { "main-client": "./wwwroot/ts/app.ts" },
+    output: {
+        filename: '[name].js',
+        path: path.join(__dirname, './wwwroot/dist'),
+        publicPath: '/dist/'
+    },
+
+    module: {
+        loaders: [
+            { test: /\.ts/, include: '/wwwroot/ts/', loader: 'ts' }
+        ]
+    }
+};
+</pre>
+                        </div>
+                    </div>
+
+                </div>
+                <p>
+                    We will put our Typescript file (app.ts) in <strong>ts</strong> folder at the web root (i.e. <i>wwwroot</i>), so we configured the <strong>entry:</strong> section of the configuration to point to that file. We then configured Webpack to
+                    output the <i>bundled</i> JavaScript file in the <strong>dist</strong> folder at the web root as shown in the <strong>output:</strong> object in the configuration file.
+                </p>
+                <p>
+                    The file name will be resolved against the <strong>[main-client].js</strong> JavaScript in the "dist" folder and finally configure the <strong>ts-loader</strong> below the <strong>output:</strong> configuration and include path to our Typescript file.
+                </p>
+                <h2 class="font-light">Adding ASP.NET Core SPA Services</h2>
+                <p>
+                    Now we need to add the SPA Services for ASP.NET Core that Webpack offers. Webpack offers <strong><i>webpack-dev-middleware</i></strong> which serves the files emitted from Webpack to a connected server such as <i>Kestrel</i>
+                    or <i>webpack-dev-server</i>. These services will be available for other programming languages as well such as Python, PHP etc in the future. You can use Angular and React client framework as the part of this Dev middleware which in turn uses
+                    another NuGet package called <i>NodeServices</i>.
+                </p>
+                <div>
+                    <img src="~/images/Blogs/Webpackhmrts/webpackhmr.png" class="img-responsive center-block" />
+                </div>
+                <p>You are not limited to use only Angular or React frameworks, you can also use your own packages or configure for your project. For this, you have to work directly with <strong><i>Microsoft.AspNetCore.NodeServices</i></strong>.</p>
+                <p>
+                    For now, we will look only at a single Typescript file to see HMR in action. To use the <i>webpack-dev-middleware</i>, you have to add this <strong>NuGet Package</strong>
+                    from where you can add the <i>webpack-dev-middleware</i> as <i>Middleware</i> in <strong>Startup.cs</strong>.
+                </p>
+                <p>
+                    To add SPA services in the project, open the NuGet Package Manager and search for <strong><i>Microsoft.AspNetCore.SpaServices</i></strong>:
+                </p>
+                <div>
+                    <img src="~/images/Blogs/Webpackhmrts/webpackhmr-2.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    Install the package, open <i>Startup.cs</i> class and add the following (from lines 8-11) Dev Middleware in the request pipeline:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">Startup.cs</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+using Microsoft.AspNetCore.SpaServices.Webpack;
+
+public class Startup
+{
+...
+      if (env.IsDevelopment())
+      {
+          app.UseDeveloperExceptionPage();
+          app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
+          {
+              HotModuleReplacement = true
+          });
+      }
+...
+}
+</pre>
+                        </div>
+                    </div>
+
+                </div>
+                <p>
+                    Do not forget to enable <strong>HotModuleReplacement</strong> to <i>true</i> as here at line 10. Now everything is setup. Create a h2 header element in Index.cshtml with id "app",
+                    create a <strong>ts</strong> folder in <i>wwwroot</i>, add a <i>app.ts</i> file in the folder
+                    and add the following contents in the file:
+                </p>
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">app.ts</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+if (module['hot']) {
+    module['hot'].accept();
+}
+
+var message = () => "Hello World";
+
+document.getElementById("app").innerHTML = message.apply(this);
+</pre>
+                        </div>
+                    </div>
+
+                </div>
+                <p>
+                    A module can only be updated if you <i>accept</i> it. This is what the lines 1-3 do. You must add these lines in order to HMR to work against your modules. Finally open the Webpack Task Runner window and run the
+                    "Development" task of Webpack by right-clicking on it and click run. After running the Webpack, it will <strong>bundle up</strong> the compiled Typescript file and will create a "dist" folder in the "wwwroot" containing the bundle.
+                </p>
+                <div>
+                    <img src="~/images/Blogs/Webpackhmrts/webpackhmr-3.png" class="img-responsive center-block" />
+                </div>
+                <p></p>
+                <blockquote>
+                    If you don't have the Webpack Task Runner Explorer Visual Studio Extension, you can download it from <a href="https://marketplace.visualstudio.com/items?itemName=MadsKristensen.WebPackTaskRunner" target="_blank" class="underline">here</a>.
+                </blockquote>
+                <p>
+                    Reference this <i>main-client.js</i> at the bottom of the body tag in <strong>_Layout.cshtml</strong> and run the application. If everything works well, you will see a <strong>[HMR] Connected</strong> message in the browser's console as:
+                </p>
+                <div>
+                    <img src="~/images/Blogs/Webpackhmrts/webpackhmr-4.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    This means that your HMR up and running. Now try to modify the Typescript file and hit save, you will see that the changed in the browser reflected immediately without reloading the page.
+                </p>
+                <div>
+                    <img src="~/images/Blogs/Webpackhmrts/webpackhmr-5.png" class="img-responsive center-block" />
+                </div>
+                <p>
+                    Webpack HMR can also be used with React and Angular Services in ASP.NET Core as we will see in upcoming posts. The ASP.NET Core and Angular\React templates, that you case as <a href="https://github.com/ligershark/CoreTemplatePack/" class="underline" target="_blank">"ASP.NET Core Templates Pack"</a> for Visual Studio or by using Yeoman's <strong><i>generator-aspnetcore-spa</i></strong>,
+                    uses the same HMR for Hot-Reloading. You can find more about the templates from <a href="http://blog.stevensanderson.com/2016/10/04/angular2-template-for-visual-studio/" class="underline" target="_blank">here</a>.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12">
+                        <div class="col-md-12">
+                            <hr />
+                            @await Component.InvokeAsync("Comment")
+                        </div>
+                    </div>
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>
+

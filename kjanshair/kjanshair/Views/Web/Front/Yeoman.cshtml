@@ -1,0 +1,324 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Yeoman Generator";
+}
+
+<header class="intro-header red-cover">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="page-heading">
+                    <img src="~/images/Web/Front/Yeoman/yeoman-title.png" class="img-responsive center-block" />
+                    <hr class="small">
+                    <span class="subheading font-light">Creating your own ASP.NET Core Yeoman Generator</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12">
+                <h2 class="font-light">What is Yeoman?</h2>
+                <p>
+                    Yeoman is a <i>Web Project Scaffolding Tool</i>. As the definition implies that Yeoman is primarily used for generating boilerplate code using Yeoman Generators and Yeoman CLI. Each project, in Yeoman, consists of a generator available
+                    on the <a href="#" class="underline">Yeoman Website</a> which we install and call in a particular directory where we want the project to be scaffold. Yeoman and Yeoman Generators are installed as separate NPM modules. It means Yeoman itself and its generators are installed via NPM.
+                    The great thing about Yeoman Generators is that they can generate projects based upon the user inputs. A complete Yeoman work-flow consists of Yeoman, Bower and <a asp-controller="Web" asp-action="Grunt" class="underline">Grunt</a>.
+                </p>
+                <p>Here we will learn how to create a Yeoman Generator of a most basic ASP.NET Core 1.0 application with how to take inputs from the users, copy files to the directory and install dependencies.</p>
+                <blockquote>
+                    I actually myself didn't find any simple documentation for creating Yeoman Generators, so I thought to write my own to show it as easy as possible. I won't here dig into how to create sub generators and other topics. This is just a simplest example.
+                </blockquote>
+                <p></p>
+                <h2 class="font-light">Directory Structure</h2>
+                <p>
+                    At first, make sure that you have installed Yeoman on your local system via NPM. If you don't know how to install, please checkout <a asp-controller="Blog" asp-action="AspNetCoreSystem" class="underline">this</a> post and navigate to the Yeoman section. You then install Yeoman's <strong>Generator</strong> generator
+                    that is created by Yeoman team for creating a custom generator easy. This generator scaffolds all the directory structure and necessary code for creating a custom generator and the hard part is done for us. To install this generator open-up the terminal and type:
+                </p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm install -g generator-generator      # -g to install globally
+</pre>
+                </div>
+                <p>
+                    This will install Yeoman's <strong>Generator</strong> generator, which we will use to create our own custom generator. Next call this generator into a directory where you want the generator's source files to be and type there in the terminal:
+                </p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+yo generator
+</pre>
+                </div>
+                <p>It will begin to ask a couple of questions about the generator such as description, email address, GitHub account and others. After providing all the information, it will start installing the required NPM dependencies and will generate a directory structure something like this.</p>
+                <pre>
+generator 
+    |
+    |__app
+        |       
+        |__ template
+        |    |_ dummyfile.txt
+        |
+        |__ index.js
+</pre>
+                <p></p>
+                <blockquote>
+                    I'll be using ASP.NET Core project to create a Yeoman Generator for this example but you can use any other project.
+                </blockquote>
+                <p>
+                    In this structure, you will find an <i>index.js</i> file and a template folder containing a <i>dummyfile.txt</i> file. You put all of your project files <i>into this template</i> folder and use the index.js file to configure the generator. Yeoman eco-system heavily relies on their directory structure, so make sure that you
+                    follow the same conventions to avoid inconvenience.
+                </p>
+                <p>Next delete the dummyfile.txt from the template folder and open the <i>index.js</i> and modify such that you only see the following code:</p>
+
+                <div>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">index.js</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+var yeoman = require('yeoman-generator');
+var chalk = require('chalk');
+var yosay = require('yosay');
+
+module.exports = yeoman.Base.extend({
+  prompting: function () {
+
+    // Have Yeoman greet the user.
+    this.log(yosay());
+
+    //Here, we will as questions from the user.
+    var prompts = [{
+
+    }];
+
+    //Here, we will save the data from the user for later use as we will see shortly
+    return this.prompt(prompts).then(function (props) {
+      this.appName = props.myApp;   
+      this.props = props;
+    }.bind(this));
+  },
+
+  //Here, we will output our project files when the generator runs.
+  writing: function () {
+
+  },
+
+  //Here, we will installed the required NPM or Bower dependencies.
+  install: function () {
+
+  }
+});
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>As you can see the purpose of each section in the comments. I'm going to use <a href="https://github.com/kjanshair/MicrosoftAzureDockerDemo" class="underline" target="_blank">this</a> simple ASP.NET Core project. But you can use your own project too.</p>
+                <p>In this example, I'll show that how to build a very simple ASP.NET Core generator which has only 4 actions:</p>
+                <ul class="list-group font-light">
+                    <li class="list-group-item">Display a welcome message</li>
+                    <li class="list-group-item">Take inputs from the user</li>
+                    <li class="list-group-item">Generate project files</li>
+                    <li class="list-group-item">Install dependencies</li>
+                </ul>
+                <p>Each step is shown in the following section.</p>
+                <h2 class="font-light">User Interactions</h2>
+                <p>Next you have to write message that will be shown when your generator will be used. This can be done in the yosay() method, simple put the required message in the string as:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+this.log(yosay('Allo Allo, this is your first Yeoman generator.'));     //You can place any message here
+</pre>
+                </div>
+                <p>In the next step, you have to take inputs from the user. These inputs can be a bool (yes\no), a number or it can be a string. Here I'll be using just string input and this can be done in the prompt section of the code as:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+ var prompts = [{
+    type: 'input',                                //Type of the input
+    name: 'myApp',                                //Variable name, that will be use later in _Layout.cshtml for title
+    message: 'What should be your app name?',     //Message for getting input
+    default: 'App'                                //Default value of input if the user did not specify any
+  }];
+</pre>
+                </div>
+                <p>Now we have to preserve this tiny user input to be used later in the project. The user input will be used to be displayed in the layout page and in the title. This can be done in this section:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+ return this.prompt(prompts).then(function (props) {
+     this.appName = props.myApp;     //The value of myApp variable is stored in appName to used in Layout page.
+     this.props = props;
+ }.bind(this));
+</pre>
+                </div>
+                <p>
+                    In order to generate the files from the source (In the generator's template folder) to destination (Where the generator is called), it is recommended that you should name them separately. One way is to put "_" before each file name in the source and remove
+                    this while generating in the target destination. For this example, rename each file by putting the "_" before and remove the "." with some files only with extensions such as <i>.bowerrc, .gitignore</i> and others.
+                </p>
+                <p>So in the <i>writing</i> function, put the following code:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+writing: function () {
+    //MVC Controllers
+    this.copy('Controllers/_HomeController.cs', 'MicrosoftAzureDockerDemo/Controllers/HomeController.cs');
+
+    //launch settings
+    this.copy('Properties/_launchSettings.json', 'MicrosoftAzureDockerDemo/Properties/launchSettings.json');
+
+    //MVC Views
+    this.copy('Views/Home/_Index.cshtml', 'MicrosoftAzureDockerDemo/Views/Home/Index.cshtml');
+    this.copy('Views/Shared/__Layout.cshtml', 'MicrosoftAzureDockerDemo/Views/Shared/_Layout.cshtml');
+    this.copy('Views/Shared/__LoginPartial.cshtml', 'MicrosoftAzureDockerDemo/Views/Shared/_LoginPartial.cshtml');
+    this.copy('Views/__ViewImports.cshtml', 'MicrosoftAzureDockerDemo/Views/_ViewImports.cshtml');
+    this.copy('Views/__ViewStart.cshtml', 'MicrosoftAzureDockerDemo/Views/_ViewStart.cshtml');
+
+    //Web Root files
+    this.copy('wwwroot/js/_site.js', 'MicrosoftAzureDockerDemo/wwwroot/js/site.js');
+    this.copy('wwwroot/_favicon.ico', 'MicrosoftAzureDockerDemo/wwwroot/favicon.ico');
+    this.copy('wwwroot/css/_site.css', 'MicrosoftAzureDockerDemo/wwwroot/css/site.css');
+
+    //Images, images names have not been changed.
+    this.copy('wwwroot/images/docker-example-1.png', 'MicrosoftAzureDockerDemo/wwwroot/images/docker-example-1.png');
+    this.copy('wwwroot/images/docker-example-2.png', 'MicrosoftAzureDockerDemo/wwwroot/images/docker-example-2.png');
+    this.copy('wwwroot/images/docker-example-3.png', 'MicrosoftAzureDockerDemo/wwwroot/images/docker-example-3.png');
+
+    //Project root files
+    this.copy('bowerrc', 'MicrosoftAzureDockerDemo/.bowerrc');
+    this.copy('gitignore', 'MicrosoftAzureDockerDemo/.gitignore');
+    this.copy('_bower.json', 'MicrosoftAzureDockerDemo/bower.json');
+    this.copy('_Program.cs', 'MicrosoftAzureDockerDemo/Program.cs');
+    this.copy('_project.json', 'MicrosoftAzureDockerDemo/project.json');
+    this.copy('_README.md', 'MicrosoftAzureDockerDemo/README.md');
+    this.copy('_Startup.cs', 'MicrosoftAzureDockerDemo/Startup.cs');
+    this.copy('_web.config', 'MicrosoftAzureDockerDemo/web.config');
+  },
+</pre>
+                </div>
+                <p>
+                    What this is actually doing is to copy the files from the template folder, which we renamed by conventions, and copy them to the directory where
+                    the generator is called and all the files are generated in the <i>/MicrosoftAzureDockerDemo/</i> directory. Then finally install dependencies which is the part of the Yeoman work-flow in the install section as:
+                </p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+install: function () {
+    //The below two lines represents where bower.json can found
+    var npmdir = process.cwd() + '/MicrosoftAzureDockerDemo';  
+    process.chdir(npmdir);
+
+    this.bowerInstall();
+}
+</pre>
+                </div>
+                <p>The final version of the file index.js file is:</p>
+                <div>
+                    <ul class="nav nav-tabs font-light" role="tablist">
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab">index.js</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <pre class="prettyprint linenums">
+var yeoman = require('yeoman-generator');
+var chalk = require('chalk');
+var yosay = require('yosay');
+
+module.exports = yeoman.Base.extend({
+  prompting: function () {
+
+    // Have Yeoman greet the user.
+    this.log(yosay('Allo Allo, this is your first Yeoman generator.'));
+
+    var prompts = [{
+      type: 'input',
+      name: 'myApp',
+      message: 'What should be your app name?',
+      default: 'App'
+    }];
+
+    return this.prompt(prompts).then(function (props) {
+      this.appName = props.myApp;
+      this.props = props;
+    }.bind(this));
+  },
+
+  writing: function () {
+    //MVC Controllers
+    this.copy('Controllers/_HomeController.cs', 'MicrosoftAzureDockerDemo/Controllers/HomeController.cs');
+
+    //launch settings
+    this.copy('Properties/_launchSettings.json', 'MicrosoftAzureDockerDemo/Properties/launchSettings.json');
+
+    //MVC Views
+    this.copy('Views/Home/_Index.cshtml', 'MicrosoftAzureDockerDemo/Views/Home/Index.cshtml');
+    this.copy('Views/Shared/__Layout.cshtml', 'MicrosoftAzureDockerDemo/Views/Shared/_Layout.cshtml');
+    this.copy('Views/Shared/__LoginPartial.cshtml', 'MicrosoftAzureDockerDemo/Views/Shared/_LoginPartial.cshtml');
+    this.copy('Views/__ViewImports.cshtml', 'MicrosoftAzureDockerDemo/Views/_ViewImports.cshtml');
+    this.copy('Views/__ViewStart.cshtml', 'MicrosoftAzureDockerDemo/Views/_ViewStart.cshtml');
+
+    //Web Root files
+    this.copy('wwwroot/js/_site.js', 'MicrosoftAzureDockerDemo/wwwroot/js/site.js');
+    this.copy('wwwroot/_favicon.ico', 'MicrosoftAzureDockerDemo/wwwroot/favicon.ico');
+    this.copy('wwwroot/css/_site.css', 'MicrosoftAzureDockerDemo/wwwroot/css/site.css');
+
+    //Images
+    this.copy('wwwroot/images/docker-example-1.png', 'MicrosoftAzureDockerDemo/wwwroot/images/docker-example-1.png');
+    this.copy('wwwroot/images/docker-example-2.png', 'MicrosoftAzureDockerDemo/wwwroot/images/docker-example-2.png');
+    this.copy('wwwroot/images/docker-example-3.png', 'MicrosoftAzureDockerDemo/wwwroot/images/docker-example-3.png');
+
+    //Project root files
+    this.copy('bowerrc', 'MicrosoftAzureDockerDemo/.bowerrc');
+    this.copy('gitignore', 'MicrosoftAzureDockerDemo/.gitignore');
+    this.copy('_bower.json', 'MicrosoftAzureDockerDemo/bower.json');
+    this.copy('_Program.cs', 'MicrosoftAzureDockerDemo/Program.cs');
+    this.copy('_project.json', 'MicrosoftAzureDockerDemo/project.json');
+    this.copy('_README.md', 'MicrosoftAzureDockerDemo/README.md');
+    this.copy('_Startup.cs', 'MicrosoftAzureDockerDemo/Startup.cs');
+    this.copy('_web.config', 'MicrosoftAzureDockerDemo/web.config');
+  },
+
+  install: function () {
+    var npmdir = process.cwd() + '/MicrosoftAzureDockerDemo';
+    process.chdir(npmdir);
+
+    this.bowerInstall();
+  }
+});
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p>Now navigate to the root of the generator's directory and type in the terminal:</p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm link
+</pre>
+                </div>
+                <p>This will begin making your generator locally on your machine. After a while, you will see that your newly created generator is now ready for use.</p>
+                <h2 class="font-light">Publishing Yeoman Generator</h2>
+                <p>
+                    As we know that Yeoman Generators, at their core, are NPM modules. So you must have a <a href="https://www.npmjs.com/" target="_blank" class="underline">NPM account</a>. Before publishing the generator, make sure that in package.json, you must have <strong>yeoman-generator</strong> keyword available in the keywords section, an appropriate project name, a version and with proper project description. Also make sure that
+                    the generator has a good README.md file with a <i>generator-&ltgenerator-name&gt</i> name syntax otherwise it won't appear on the Yeoman website. It should also have a GitHub repository where you will place your generator's source code. Finally publish your generator by typing in the terminal (in the working directory) as:
+                </p>
+                <div class="code-block">
+                    <pre class="prettyprint linenums">
+npm publish
+</pre>
+                </div>
+                <p>After successful publishing, you will begin to see your Yeoman generator at the Yeoman's website after some time.</p>
+
+            </div>
+        </div>
+        <div class="row">
+            <environment names="Staging,Production">
+                <div class="col-md-12">
+                    <hr />
+                    @await Component.InvokeAsync("Comment")
+                </div>
+            </environment>
+        </div>
+    </div>
+</article>
